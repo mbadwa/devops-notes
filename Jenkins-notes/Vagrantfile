@@ -1,0 +1,40 @@
+Vagrant.configure("2") do |config|
+  config.hostmanager.enabled = true 
+  config.hostmanager.manage_host = true
+  
+  # Sync the current directory to /vagrant inside the VM
+  config.vm.synced_folder ".", "/vagrant", disabled: false
+ 
+  ### Jenkins Server VM ###
+  config.vm.define "nexus_server" do |jenkins_server|
+    nexus_server.vm.box = "centos/8"
+    nexus_server.vm.hostname = "nexus"
+    
+    nexus_server.vm.network "private_network", ip: "192.168.56.11"
+    
+    nexus_server.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.memory = "4096"
+    end
+    
+    nexus_server.vm.provision "shell", inline: <<-SHELL
+      export DEBIAN_FRONTEND=noninteractive
+      apt update
+      apt install openjdk-11-jdk  -y
+      wget -O /usr/share/keyrings/jenkins-keyring.asc \
+        https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+        https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+        /etc/apt/sources.list.d/jenkins.list > /dev/null
+      apt update
+      apt install jenkins -y
+      systemctl start jenkins
+      systemctl enable jenkins
+      uptime
+      sleep 5
+      apt install openjdk-8-jdk  -y
+    SHELL
+  end
+end
+
+
