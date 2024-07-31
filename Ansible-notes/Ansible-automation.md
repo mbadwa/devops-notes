@@ -243,6 +243,103 @@ Dry run
 
 Note: Once the playbook is created, you run a syntax check, the dry run and then execute it. On another note, you don't need to reinvent the wheel you can search for modules, scroll down to an example copy and edit it accordingly. For example; here is the [yum module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html#ansible-collections-ansible-builtin-yum-repository-module).
 
+### Modules
+This section will look at how to fetch modules and reuse them.
+
+Creating a file using a module, search the [documentation](https://docs.ansible.com/ansible/2.9/modules/modules_by_category.html)
+
+Open > [Copy Module](https://docs.ansible.com/ansible/2.9/modules/copy_module.html#copy-module) > Scroll down to example and copy it.
+
+      sudo cp -r inventory_playbook inventory_cp_module
+      cd inventory_cp_module
+      sudo vim  web.yaml
+      chmod "400" clientkey.pem 
+
+Copy the [copy module](copyfile-module.yaml) content and paste in the "web.yaml" file.
+
+Syntax check, dry run and run
+
+      ansible-playbook -i inventory web.yaml --syntax-check
+      ansible-playbook -i inventory web.yaml -C
+      ansible-playbook -i inventory web.yaml
+
+
+Copy the folder and rename it
+
+      sudo cp -r inventory_cp_module inventory_db_module
+      cd inventory_db_module
+      sudo vim  web.yaml
+      chmod "400" clientkey.pem 
+
+Open the database [module](https://docs.ansible.com/ansible/2.9/modules/list_of_database_modules.html) > [Add or remove DB](https://docs.ansible.com/ansible/2.9/modules/mysql_db_module.html#mysql-db-module), copy example and paste. It should look like [this one](db.yaml).
+
+Syntax check, dry run and run
+
+      ansible-playbook -i inventory db.yaml --syntax-check
+      ansible-playbook -i inventory db.yaml -C
+      ansible-playbook -i inventory db.yaml
+
+You get this error, it means that the target doesn't have the required dependency. 
+
+      TASK [Create a new database with name 'accounts'] *******************************************************************************************************
+      fatal: [db01]: FAILED! => {"changed": false, "msg": "A MySQL module is required: for Python 2.7 either PyMySQL, or MySQL-python, or for Python 3.X mysqlclient or PyMySQL. Consider setting ansible_python_interpreter to use the intended Python version."}
+
+Remote into db server and check the requirement
+
+      ssh -i clientkey.pem ec2-user@172.31.40.2 
+      yum search python | grep -i mysql
+
+      # copy the dependency
+      python3-PyMySQL
+
+      exit
+
+Open the "db.yaml" playbook it should be like [this](./db.yaml)
+
+      sudo vim db.yaml
+
+Syntax check, dry run and run
+
+      ansible-playbook -i inventory db.yaml --syntax-check
+      ansible-playbook -i inventory db.yaml -C
+      ansible-playbook -i inventory db.yaml
+
+Error
+
+      TASK [Create a new database with name 'accounts'] *******************************************************************************************************
+      fatal: [db01]: FAILED! => 
+The error indicates that Ansible service is not able to talk to MySQL service. Services talk to each other through socket files.
+      
+Open the ["db.yaml"](./db.yaml) playbook and paste the line below. 
+
+      login_unix_socket: /var/lib/mysql/mysql.sock
+
+
+Going forward we will use [Ansible Community version](https://docs.ansible.com/ansible/latest/collections/community/mysql/mysql_db_module.html#ansible-collections-community-mysql-mysql-db-module)
+
+Installation onto the target, db01 server
+
+      ansible-galaxy collection install community.mysql
+      sudo vim db.yaml
+
+      # Paste this name as name:
+      community.mysql.mysql_db
+
+Add user by using [MySQL user module](https://docs.ansible.com/ansible/latest/collections/community/mysql/)
+
+The updated code [here](/Ansible-notes/db.yaml)
+
+Syntax check, dry run and run
+
+      ansible-playbook -i inventory db.yaml --syntax-check
+      ansible-playbook -i inventory db.yaml -C
+      ansible-playbook -i inventory db.yaml
+
+
+
+      
+      
+
 
 ## YAML & JSON Refresher
 A Python dictionary is like JSON in another format and a stripped dictionary in YAML.
@@ -300,3 +397,4 @@ Note: Ansible format is YAML but the results are returned in JSON.
 4. [Adhoc commands](https://docs.ansible.com/ansible/latest/command_guide/intro_adhoc.html)
 5. [Ansible Playbook Syntax](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html#playbook-syntax)
 6. [Ansible Modules](https://docs.ansible.com/ansible/latest/collections/index_module.html)
+7. [Ansible Community](https://docs.ansible.com/ansible/latest/collections/community/mysql/mysql_db_module.html#ansible-collections-community-mysql-mysql-db-module)
