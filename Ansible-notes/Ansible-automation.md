@@ -786,7 +786,10 @@ Just like any EC2 server provisioning we will follow the steps of the console [p
       - Attach policies directly
         - Check the "AdministratorAccess"
       - Hit Next
-      - Tags
+      - Tagssudo vim provisioning.yaml
+      roles:
+        - shaneholloman.java
+
         - Key: "Name"
         - Value: "Ansible User"
       - Hit Create user
