@@ -25,12 +25,12 @@ variable "my_ip" {
 
 variable "key_name" {
   description = "The name of the key pair to use for SSH."
-  default     = "clients-key-pair"
+  default     = "client-key-pair"
 }
 
 # Define the security group for clients
 resource "aws_security_group" "clients_sg" {
-  name        = "clients-SG"
+  name        = "client-SG"
   description = "Allow SSH access from specific IP and control-SG."
 
   # Allow SSH from specific IP
@@ -60,33 +60,15 @@ resource "aws_security_group" "clients_sg" {
   }
 
   tags = {
-    Name = "clients-SG"
+    Name = "client-SG"
   }
 }
 
-# Define the security group for control
-resource "aws_security_group" "control_sg" {
-  name        = "control-SG"
-  description = "Security group for control access."
-
-  # Allow SSH from anywhere (or specify your IP)
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
-  }
-
-  # Allow all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "control-SG"
+# Data source to retrieve existing security group
+data "aws_security_group" "control_sg" {
+  filter {
+    name   = "group-name"
+    values = ["control-SG"]
   }
 }
 
@@ -102,6 +84,12 @@ resource "aws_instance" "web" {
   tags = {
     Name = "web00-${count.index + 1}"
   }
+
+  # Optionally, you can provide a user data script to configure your instance
+  user_data = <<-EOF
+                #!/bin/bash
+                echo date
+              EOF
 }
 
 # Output the public IPs of the instances

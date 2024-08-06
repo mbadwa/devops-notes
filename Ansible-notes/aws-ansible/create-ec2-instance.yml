@@ -1,0 +1,37 @@
+---
+- hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: create a new ec2 key pair
+      ec2_key:
+        name: ansible_keypair
+        region: us-east-1
+      register: keyout
+
+        #- name: Print key
+        #debug:
+        #  var: keyout
+
+    - name: Save key
+      copy:
+        content: "{{keyout.key.private_key}}"
+        dest: ./ansible-key.pem
+      when: keyout.changed
+
+    - name: Changing perm of "./ansible-key.pem", adding "+r-w"
+      file: dest=./ansible-key.pem mode=u+r-wx,g-rwx,o-rwx
+
+    - name: Start an instance
+      amazon.aws.ec2_instance:
+        name: "testing-EC2-instance"
+        key_name: "{{keyout.key.name}}"
+          #vpc_subnet_id: subnet-5ca1ab1e
+        instance_type: t2.micro
+        security_group: default
+        network:
+          assign_public_ip: true
+        image_id: ami-0ba9883b710b05ac6
+        exact_count: 1  
+        region: us-east-1  
+        tags:
+            Environment: Testing

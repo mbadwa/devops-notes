@@ -1,10 +1,32 @@
 {
     "cSpell.ignoreWords": [
+        "USRNM",
+        "USROUT",
         "Webserver",
+        "ansibleadmin",
+        "boto",
+        "chrony",
+        "chronyd",
         "clientkey",
+        "commonuser",
+        "dbname",
+        "dbpass",
         "dbservers",
+        "dbsrvgrp",
+        "dbuser",
+        "groupname",
+        "groupvars",
+        "keyout",
+        "keypair",
+        "mydir",
         "mysqlclient",
+        "ntpconf",
+        "playuser",
+        "shaneholloman",
+        "sqluser",
         "vprofile",
-        "webservers"
+        "webgroup",
+        "webservers",
+        "websrvgrp"
     ]
 }
