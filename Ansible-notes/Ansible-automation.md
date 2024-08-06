@@ -4,19 +4,19 @@ Ansible is simple and easy to use and doesn't need any server setups like other 
 
 ## Use Cases
 
-1. Automation
+### 1. Automation
 
     Ansible has so many use cases for example any system automation, ie. Windows automation, Linux automation, web services automation, database services automation, Start/stop services, etc.
 
-2. Change Management
+### 2. Change Management
 
    Managing changes of production servers using playbooks as documentation
 
-3. Provisioning
+### 3. Provisioning
    
    You can provision servers from scratch/Cloud provisioning as well.
 
-4. Orchestration
+### 4. Orchestration
    
    Large scale automation framework, combining multiple automation tools and scripts together and execute them in an orderly fashion. You can combine Ansible with other tools like Jenkins, cloud services, etc.
 
@@ -178,169 +178,178 @@ An ad hoc command looks like this:
 
       $ ansible [pattern] -m [module] -a "[module options]"
 
-The ping module is an example of adhoc commands, this section will explore more commands
+The ping module is an example of adhoc commands, this section will 
+explore more commands
 
-      sudo cp -r exercise3 exercise4
-      cd exercise4
-      sudo vim inventory
-      chmod "400" clientkey.pem
+**Steps**
+
+1. Create a folder name exercise4
+
+            sudo cp -r exercise3 exercise4
+            cd exercise4
+            sudo vim inventory
+            chmod "400" clientkey.pem
 
 
-Install Apache server on Web01 and Web02
+2. Install Apache server on Web01 and Web02
 
-      sudo ansible web01 -m ansible.builtin.yum -a "name=httpd state=present" -i inventory --become
+            sudo ansible web01 -m ansible.builtin.yum -a "name=httpd state=present" -i inventory --become
 
-      sudo ansible webservers -m ansible.builtin.yum -a "name=httpd state=present" -i inventory --become
+            sudo ansible webservers -m ansible.builtin.yum -a "name=httpd state=present" -i inventory --become
 
-Uninstall Apache server on Web01 and Web02 if present
+3. Uninstall Apache server on Web01 and Web02 if present
 
-      sudo ansible web01 -m ansible.builtin.yum -a "name=httpd state=absent" -i inventory --become
+            sudo ansible web01 -m ansible.builtin.yum -a "name=httpd state=absent" -i inventory --become
 
-      sudo ansible webservers -m ansible.builtin.yum -a "name=httpd state=absent" -i inventory --become
+            sudo ansible webservers -m ansible.builtin.yum -a "name=httpd state=absent" -i inventory --become
 
-Start and enable httpd service
+4. Start and enable httpd service
 
-      sudo ansible webservers -m ansible.builtin.service -a "name=httpd state=started enabled=yes" -i inventory --become
+            sudo ansible webservers -m ansible.builtin.service -a "name=httpd state=started enabled=yes" -i inventory --become
 
-Create copy a file to webservers
+5. Create copy a file to webservers
 
-      # Create a file locally, enter any text and save
-      vim index.html
+            # Create a file locally, enter any text and save
+            vim index.html
 
-      sudo ansible webservers -m ansible.builtin.copy -a "src=index.html dest=/var/www/html/index.html" -i inventory --become
+            sudo ansible webservers -m ansible.builtin.copy -a "src=index.html dest=/var/www/html/index.html" -i inventory --become
 
 ### Ansible Playbook & Modules
 
 Ansible Playbooks are lists of tasks that automatically execute for your specified inventory or groups of hosts. One or more Ansible tasks can be combined to make a play—an ordered grouping of tasks mapped to specific hosts—and tasks are executed in the order in which they are written. For more details on playbooks go [here](https://docs.ansible.com/ansible/latest/playbook_guide/index.html)
 
-Create a playbook named "web-db.yaml" copy from [here](./vprofile/exercise5/web-db.yaml). The folder will now have 3 files; inventory file, the playbook file and the ssh key file.
+**Steps**
 
-      sudo cp -r exercise4 exercise5
-      cd exercise5
-      sudo vim  web-db.yaml
-      chmod "400" clientkey.pem 
+1. Create a playbook named "web-db.yaml" copy from [here](./vprofile/exercise5/web-db.yaml). The folder will now have 3 files; inventory file, the playbook file and the ssh key file.
 
-Note: In any folder you have secrets or ssh keys, you need to use gitignore so that you avoid publishing it in GitHub for example.
+            sudo cp -r exercise4 exercise5
+            cd exercise5
+            sudo vim  web-db.yaml
+            chmod "400" clientkey.pem 
 
-Before continuing we need to remove httpd services installed in webservers
+      Note: In any folder you have secrets or ssh keys, you need to use gitignore so that you avoid publishing it in GitHub for example.
 
-      sudo ansible webservers -m yum -a "name=httpd state=absent" -i inventory --become
+2. Before continuing we need to remove httpd services installed in webservers
 
-Run the playbook
+            sudo ansible webservers -m yum -a "name=httpd state=absent" -i inventory --become
 
-      # normal execution
+3. Run the playbook
 
-      sudo ansible-playbook -i inventory name-of-playbook
-      sudo ansible-playbook -i inventory web-db.yaml
+            # normal execution
 
-      # verbose execution
-      
-      sudo ansible-playbook -i inventory web-db.yaml -v
-      sudo ansible-playbook -i inventory web-db.yaml -vv
-      sudo ansible-playbook -i inventory web-db.yaml -vvv
-      sudo ansible-playbook -i inventory web-db.yaml -vvvv
+            sudo ansible-playbook -i inventory name-of-playbook
+            sudo ansible-playbook -i inventory web-db.yaml
+
+            # verbose execution
+            
+            sudo ansible-playbook -i inventory web-db.yaml -v
+            sudo ansible-playbook -i inventory web-db.yaml -vv
+            sudo ansible-playbook -i inventory web-db.yaml -vvv
+            sudo ansible-playbook -i inventory web-db.yaml -vvvv
        
-To check syntax of a playbook, if it finds an error it'll spit a message, otherwise it'll just display the name of the playbook
+4. To check syntax of a playbook, if it finds an error it'll spit a message, otherwise it'll just display the name of the playbook
 
-      sudo ansible-playbook -i inventory web-db.yaml --syntax-check
+            sudo ansible-playbook -i inventory web-db.yaml --syntax-check
 
-Dry run 
+5. Dry run 
 
-      sudo ansible-playbook -i inventory web-db.yaml -C
+            sudo ansible-playbook -i inventory web-db.yaml -C
 
-Note: Once the playbook is created, you run a syntax check, the dry run and then execute it. On another note, you don't need to reinvent the wheel you can search for modules, scroll down to an example copy and edit it accordingly. For example; here is the [yum module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html#ansible-collections-ansible-builtin-yum-repository-module).
+      Note: Once the playbook is created, you run a syntax check, the dry run and then execute it. On another note, you don't need to reinvent the wheel you can search for modules, scroll down to an example copy and edit it accordingly. For example; here is the [yum module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html#ansible-collections-ansible-builtin-yum-repository-module).
 
 ### Modules
 This section will look at how to fetch modules and reuse them.
 
 Creating a file using a module, search the [documentation](https://docs.ansible.com/ansible/2.9/modules/modules_by_category.html)
 
-Open > [Copy Module](https://docs.ansible.com/ansible/2.9/modules/copy_module.html#copy-module) > Scroll down to example and copy the copy module.
+**Steps**
 
-      sudo cp -r exercise5 exercise6
-      cd exercise6
-      sudo vim  web.yaml
-      chmod "400" clientkey.pem 
+1. Open > [Copy Module](https://docs.ansible.com/ansible/2.9/modules/copy_module.html#copy-module) > Scroll down to example and copy the copy module.
 
-Copy the [copy module](./vprofile/exercise6/web.yaml) content and paste in the "web.yaml" file.
+            sudo cp -r exercise5 exercise6
+            cd exercise6
+            sudo vim  web.yaml
+            chmod "400" clientkey.pem 
 
-Syntax check, dry run and run
+2. Copy the [copy module](./vprofile/exercise6/web.yaml) content and paste in the "web.yaml" file.
 
-      sudo ansible-playbook -i inventory web.yaml --syntax-check
-      sudo ansible-playbook -i inventory web.yaml -C
-      sudo ansible-playbook -i inventory web.yaml
+      Syntax check, dry run and run
+
+            sudo ansible-playbook -i inventory web.yaml --syntax-check
+            sudo ansible-playbook -i inventory web.yaml -C
+            sudo ansible-playbook -i inventory web.yaml
 
 
-Copy the folder exercise5 because we need to re-use web-db.yaml file and rename it. The new file will be [db.yaml](./vprofile/exercise7/db.yaml)
+4. Copy the folder exercise5 because we need to re-use web-db.yaml file and rename it. The new file will be [db.yaml](./vprofile/exercise7/db.yaml)
 
-      sudo cp -r exercise5 exercise7
-      cd exercise7
-      sudo vim  db.yaml
-      chmod "400" clientkey.pem 
+            sudo cp -r exercise5 exercise7
+            cd exercise7
+            sudo vim  db.yaml
+            chmod "400" clientkey.pem 
 
-Open the database [module](https://docs.ansible.com/ansible/2.9/modules/list_of_database_modules.html) > [Add or remove DB](https://docs.ansible.com/ansible/2.9/modules/mysql_db_module.html#mysql-db-module), copy example and paste. It should look like [this one](./vprofile/exercise7/db.yaml).
+5. Open the database [module](https://docs.ansible.com/ansible/2.9/modules/list_of_database_modules.html) > [Add or remove DB](https://docs.ansible.com/ansible/2.9/modules/mysql_db_module.html#mysql-db-module), copy example and paste. It should look like [this one](./vprofile/exercise7/db.yaml).
 
-Syntax check, dry run and run
+      Syntax check, dry run and run
 
-      ansible-playbook -i inventory db.yaml --syntax-check
-      ansible-playbook -i inventory db.yaml -C
-      ansible-playbook -i inventory db.yaml
+            ansible-playbook -i inventory db.yaml --syntax-check
+            ansible-playbook -i inventory db.yaml -C
+            ansible-playbook -i inventory db.yaml
 
-You get this error, it means that the target doesn't have the required dependency. 
+      You get this error, it means that the target doesn't have the required dependency. 
 
-      TASK [Create a new database with name 'accounts'] *******************************************************************************************************
-      fatal: [db01]: FAILED! => {"changed": false, "msg": "A MySQL module is required: for Python 2.7 either PyMySQL, or MySQL-python, or for Python 3.X mysqlclient or PyMySQL. Consider setting ansible_python_interpreter to use the intended Python version."}
+            TASK [Create a new database with name 'accounts'] *******************************************************************************************************
+            fatal: [db01]: FAILED! => {"changed": false, "msg": "A MySQL module is required: for Python 2.7 either PyMySQL, or MySQL-python, or for Python 3.X mysqlclient or PyMySQL. Consider setting ansible_python_interpreter to use the intended Python version."}
 
-Remote into db server and check the requirement
+5. Remote into db server and check the requirement
 
-      ssh -i clientkey.pem ec2-user@172.31.40.2 
-      yum search python | grep -i mysql
+            ssh -i clientkey.pem ec2-user@172.31.40.2 
+            yum search python | grep -i mysql
 
-      # copy the dependency
-      python3-PyMySQL
+            # copy the dependency
+            python3-PyMySQL
 
-      exit
+            exit
 
-Open the "db.yaml" playbook it should be like [this](./vprofile/exercise7/db.yaml)
+6. Open the "db.yaml" playbook it should be like [this](./vprofile/exercise7/db.yaml)
 
-      sudo vim db.yaml
+            sudo vim db.yaml
 
-Syntax check, dry run and run
+      Syntax check, dry run and run
 
-      ansible-playbook -i inventory db.yaml --syntax-check
-      ansible-playbook -i inventory db.yaml -C
-      ansible-playbook -i inventory db.yaml
+            ansible-playbook -i inventory db.yaml --syntax-check
+            ansible-playbook -i inventory db.yaml -C
+            ansible-playbook -i inventory db.yaml
 
-Error
+      Error
 
-      TASK [Create a new database with name 'accounts'] *******************************************************************************************************
-      fatal: [db01]: FAILED! => 
-The error indicates that Ansible service is not able to talk to MySQL service. Services talk to each other through socket files.
+            TASK [Create a new database with name 'accounts'] *******************************************************************************************************
+            fatal: [db01]: FAILED! => 
+      The error indicates that Ansible service is not able to talk to MySQL service. Services talk to each other through socket files.
       
-Open the ["db.yaml"](./vprofile/exercise7/db.yaml) playbook and paste the line below. 
+7. Open the ["db.yaml"](./vprofile/exercise7/db.yaml) playbook and paste the line below. 
 
-      login_unix_socket: /var/lib/mysql/mysql.sock
+            login_unix_socket: /var/lib/mysql/mysql.sock
 
 
-Going forward we will use [Ansible Community version](https://docs.ansible.com/ansible/latest/collections/community/mysql/mysql_db_module.html#ansible-collections-community-mysql-mysql-db-module)
+      Going forward we will use [Ansible Community version](https://docs.ansible.com/ansible/latest/collections/community/mysql/mysql_db_module.html#ansible-collections-community-mysql-mysql-db-module)
 
-Installation onto the target, db01 server
+8. Installation onto the target, db01 server
 
-      ansible-galaxy collection install community.mysql
-      sudo vim db.yaml
+            ansible-galaxy collection install community.mysql
+            sudo vim db.yaml
 
-      # Paste this name as name:
-      community.mysql.mysql_db
+            # Paste this name as name:
+            community.mysql.mysql_db
 
-Add user by using [MySQL user module](https://docs.ansible.com/ansible/latest/collections/community/mysql/)
+9. Add user by using [MySQL user module](https://docs.ansible.com/ansible/latest/collections/community/mysql/)
 
-The updated code [here](/Ansible-notes/vprofile/exercise7/db.yaml)
+      The updated code [here](/Ansible-notes/vprofile/exercise7/db.yaml)
 
-Syntax check, dry run and run
+      Syntax check, dry run and run
 
-      ansible-playbook -i inventory db.yaml --syntax-check
-      ansible-playbook -i inventory db.yaml -C
-      ansible-playbook -i inventory db.yaml
+            ansible-playbook -i inventory db.yaml --syntax-check
+            ansible-playbook -i inventory db.yaml -C
+            ansible-playbook -i inventory db.yaml
 
 
 ### Ansible Configuration Settings
@@ -362,34 +371,38 @@ Ansible uses port 22 as a default port for SSH, however if you change SSH defaul
 
 Open the "/etc/ansible/ansible.cfg" file, descriptions and config settings can be found [here](https://docs.ansible.com/archive/ansible/2.4/intro_configuration.html).
 
-      sudo -i
-      vim /etc/ansible/ansible.cfg
+**Steps**
 
-Creating the Ansible [config file](./vprofile/exercise7/ansible.cfg)
+1. Create a config file
+   
+            sudo -i
+            vim /etc/ansible/ansible.cfg
 
-      sudo vim ansible.cfg
-      chmod "400" clientkey.pem
+2. Creating the Ansible [config file](./vprofile/exercise7/ansible.cfg)
 
-      sudo touch /var/log/ansible.log
-      sudo chown ubuntu.ubuntu /var/log/ansible.log
+            sudo vim ansible.cfg
+            chmod "400" clientkey.pem
 
-Run
+            sudo touch /var/log/ansible.log
+            sudo chown ubuntu.ubuntu /var/log/ansible.log
 
-      ansible-playbook playbook-name
-      ansible-playbook db.yaml
+3. Run
+
+            ansible-playbook playbook-name
+            ansible-playbook db.yaml
 
 ### Ansible VARIABLES
 
 How to define variables in a playbook, these can be set below "hosts" or before the "tasks" section in the global configuration. They can be defined with the options presented.
 
-#### PLAYBOOK
+#### 1. PLAYBOOK
 
       - hosts: webservers
         vars:
           http_port: 80
           sqluser: admin
 
-#### Inventory Based in the inventory file
+#### 2. Inventory Based in the inventory file
       
       # All the hosts variable is for variables we want to use in the playbook. 
       
@@ -405,9 +418,9 @@ How to define variables in a playbook, these can be set below "hosts" or before 
 
 Note: All these variables are defined outside of the playbook
 
-#### Roles include variables from files in playbook
+#### 3. Roles include variables from files in playbook
 
-#### Ansible builtin Variables 
+### Ansible builtin Variables 
 
 Fact Variables: setup module
 
@@ -439,73 +452,73 @@ These are run time variables that return output in JSON format after a playbook 
 
 #### PLAYBOOK variables examples & Inventory Based examples outside the playbook
 
-Using variables inside the playbook
+**Steps**
 
-      sudo cp -r exercise8 exercise9
-      cd exercise9
-      mkdir group_vars
-      sudo vim group_vars/all
-      chmod "400" clientkey.pem
+1. Using variables inside the playbook
 
-
-Run the [playbook](./vprofile/exercise9/vars_precedence.yaml)
-
-      ansible-playbook playbook-name
-      ansible-playbook vars_precedence.yaml
+            sudo cp -r exercise8 exercise9
+            cd exercise9
+            mkdir group_vars
+            sudo vim group_vars/all
+            chmod "400" clientkey.pem
 
 
-The name of the folder has to be exactly "group_vars" and the file name, "all".
+2. Run the [playbook](./vprofile/exercise9/vars_precedence.yaml)
 
-Run the [playbook](./vprofile/exercise9/vars_precedence.yaml)
+            ansible-playbook playbook-name
+            ansible-playbook vars_precedence.yaml
 
-      ansible-playbook playbook-name
-      ansible-playbook db.yaml
 
-To suppress the Facts gathering that uses builtin run time variables cd exercise9 and edit it as per print fact [file](./vprofile/exercise9/vars_precedence.yaml) like below
+3. The name of the folder has to be exactly "group_vars" and the file name, "all". Run the [playbook](./vprofile/exercise9/vars_precedence.yaml)
 
-      gather_facts: False
+            ansible-playbook playbook-name
+            ansible-playbook db.yaml
 
-Run 
+4. To suppress the Facts gathering that uses builtin run time variables cd exercise9 and edit it as per print fact [file](./vprofile/exercise9/vars_precedence.yaml) like below
 
-      ansible-playbook vars_precedence.yaml
+            gather_facts: False
 
-You'll notice that the "TASK [Gathering Facts]" disappear.
+5. Run 
 
-To pull specific variables, create a file named ["print_fact.yaml"](./vprofile/exercise9/print_fact.yaml)
+            ansible-playbook vars_precedence.yaml
 
-      sudo vim print_fact.yaml
+      You'll notice that the "TASK [Gathering Facts]" disappear.
 
-To view setup variables
+6. To pull specific variables, create a file named ["print_fact.yaml"](./vprofile/exercise9/print_fact.yaml)
 
-      ansible -m setup server-name
-      ansible -m setup web01
+            sudo vim print_fact.yaml
 
-Create an ubuntu webserver using the [Terraform](./vprofile/exercise9/terraform/main.tf). 
+7. To view setup variables
 
-Cd into the terraform folder
+            ansible -m setup server-name
+            ansible -m setup web01
 
-      terraform init
-      terraform apply
+8. Create an ubuntu webserver using the [Terraform](./vprofile/exercise9/terraform/main.tf). 
 
-SSH into the Ansible control and update the inventory to reflect the hostname and username of web03
+      Cd into the terraform folder
 
-      sudo vim inventory
+            terraform init
+            terraform apply
 
-      web03:
-      ansible_host: 172.31.95.117
-      ansible_user: ubuntu
+4. SSH into the Ansible control and update the inventory to reflect the hostname and username of web03
 
-Run the setup module and fetch the variables
+            sudo vim inventory
 
-      ansible -m setup web01
+            web03:
+            ansible_host: 172.31.95.117
+            ansible_user: ubuntu
 
-Run the ansible facts playbook
+5. Run the setup module and fetch the variables
 
-      ansible-playbook vars_precedence.yaml
+            ansible -m setup web01
 
-Run 
+6. Run the ansible facts playbook
 
-      ansible-playbook vars_precedence.yaml
+            ansible-playbook vars_precedence.yaml
+
+7. Run 
+
+            ansible-playbook vars_precedence.yaml
 
 #### Provisioning a server
 
@@ -523,113 +536,122 @@ Run
 
 ##### 1. NTP service setup on ubuntu and CentOS
 
-Copy exercise9 to exercise10
+**Steps**
 
-      cp -r exercise9 exercise10
-      cd exercise10
-      chmod 400 clientkey.pem
-      sudo rm -rf print_facts.yaml vars_precedence.yaml
-      sudo vim provisioning.yaml
+1. Copy exercise9 to exercise10
 
-Run 
+            cp -r exercise9 exercise10
+            cd exercise10
+            chmod 400 clientkey.pem
+            sudo rm -rf print_facts.yaml vars_precedence.yaml
+            sudo vim provisioning.yaml
 
-      ansible-playbook provisioning.yaml
+2. Run 
 
-Note: It skipped installation on Centos because the package was already installed and it's in a running sate.
+            ansible-playbook provisioning.yaml
+
+      Note: It skipped installation on Centos because the package was already installed and it's in a running sate.
 
 ##### 2. Loops
 
 Use Cases
 
-If you have a number of packages to install on servers, you can create a loop of the packages to be installed in a list format. Like [so](./vprofile/exercise11/provisioning.yaml):
+If you have a number of packages to install on servers, you can create a loop of the packages to be installed in a list format. Like [so](./vprofile/exercise11/provisioning.yaml)
 
-      cp -r exercise10 exercise11
-      cd exercise11
-      sudo vim provisioning.yaml
+**Steps**
 
-      # Change the name of the task and package name to a variable instead
+1. Copy folder
 
-      - name: Install centos packages
-        yum:
-          name: "{{item}}"
+            cp -r exercise10 exercise11
+            cd exercise11
+            sudo vim provisioning.yaml
 
-      - name: Install ubuntu packages
-        yum:
-          name: "{{item}}"
+2. Change the name of the task and package name to a variable instead
+
+            - name: Install centos packages
+              yum:
+                name: "{{item}}"
+
+            - name: Install ubuntu packages
+              yum:
+                name: "{{item}}"
 
 
-      #add below code after centos install task and ubuntu install task
+3. add below code after centos install task and ubuntu install task
       
-      # Centos section
-      loop:
-        - chrony
-        - wget
-        - gir
-        - zip
-        - unzip
+            # Centos section
+            loop:
+            - chrony
+            - wget
+            - gir
+            - zip
+            - unzip
 
-      # Ubuntu section
-      loop:
-        - ntp
-        - wget
-        - gir
-        - zip
-        - unzip
+            # Ubuntu section
+            loop:
+            - ntp
+            - wget
+            - gir
+            - zip
+            - unzip
   
-  For more info on loops check this [here](https://docs.ansible.com/ansible/latest/playbook_guide/).
+      For more info on loops check this [here](https://docs.ansible.com/ansible/latest/playbook_guide/).
 
 ##### 3. File, copy & template modules**
 
-Open the provisioning file
+**Steps**
 
-      sudo vim provisioning.yaml
+1. Open the provisioning file
 
-add a task that creates a motd file
+            sudo vim provisioning.yaml
+
+2. add a task that creates a motd file
       
-      - name: Banner file
-        copy:
-          content: '# This server is managed by Ansible. No manual changes should be done.'
-          dest: /etc/motd
+         - name: Banner file
+           copy:
+             content: '# This server is managed by Ansible. No manual changes should be done.'
+             dest: /etc/motd
 
-SSH into web01 server to copy ntp config file content
+4. SSH into web01 server to copy ntp config file content
       
-      ssh -i clientkey.pem ec2-user@its-private-ip
-      sudo -i
-      cat /etc/chrony.conf
+            ssh -i clientkey.pem ec2-user@its-private-ip
+            sudo -i
+            cat /etc/chrony.conf
 
-In the control server create a folder named templates
+5. In the control server create a folder named templates
 
-      sudo mkdir templates
-      sudo vim templates/ntpconf_centos
-      paste the copied content
+            sudo mkdir templates
+            sudo vim templates/ntpconf_centos
+            paste the copied content
 
-SSH into db01 server to copy ntp config file content
-      ssh -i clientkey.pem ubuntu@its-private-ip
-      sudo -i
-      cat /etc/ntp.conf
+6. SSH into db01 server to copy ntp config file content
+            ssh -i clientkey.pem ubuntu@its-private-ip
+            sudo -i
+            cat /etc/ntp.conf
 
-In the control server create a file named ntpconf_ubuntu
-      sudo vim templates/ntpconf_ubuntu
-      paste the copied content
+7. In the control server create a file named ntpconf_ubuntu
+            
+            sudo vim templates/ntpconf_ubuntu
+            paste the copied content
 
-Create ntp task like shown in the provisioning file [here](./vprofile/exercise12/provisioning.yaml)
+8. Create ntp task like shown in the provisioning file [here](./vprofile/exercise12/provisioning.yaml)
 
-Update the [group variables](./vprofile/exercise12/group_vars/all) and the [templates folder](./vprofile/exercise11/templates/)
+      Update the [group variables](./vprofile/exercise12/group_vars/all) and the [templates folder](./vprofile/exercise11/templates/)
 
-Run 
+      Run 
 
-      ansible-playbook provisioning.yaml -C
-      ansible-playhttps://docs.ansible.com/ansible/latest/playbook_guide/book provisioning.yaml
+            ansible-playbook provisioning.yaml -C
+            ansible-playhttps://docs.ansible.com/ansible/latest/playbook_guide/book provisioning.yaml
 
-#####  5. Choosing not to restart services by using handlers
+#####  4. Choosing not to restart services by using handlers
 
-Create a file exactly like this [one](./vprofile/exercise13/provisioning.yaml)
+   1. Create a file exactly like this [one](./vprofile/exercise13/provisioning.yaml)
 
-      cp -r exercise12 exercise13
-      cd exercise13
-      sudo vim provisioning.yaml
+            cp -r exercise12 exercise13
+            cd exercise13
+            sudo vim provisioning.yaml
 
-For more info on handlers check [here](https://docs.ansible.com/ansible/latest/playbook_guide/)
+      For more info on handlers check [here](https://docs.ansible.com/ansible/latest/playbook_guide/)
 
 ### Ansible Roles
 
@@ -652,100 +674,101 @@ Role Structure Diagram
 
 Tweak the provisioning.yaml file to add variable to create a file just to make it a bit complex. The file should look like this.
 
-Before continuing install tree utility
+1. Before continuing install tree utility
 
-      sudo apt install tree
-      tree exercise14
+            sudo apt install tree
+            tree exercise14
 
-Run the playbook
+2. Run the playbook
 
-      ansible-playbook provisioning.yaml
+            ansible-playbook provisioning.yaml
 
-To create role, run this command, "ansible-galaxy init role-name" replace role-name with your name like below.
+3. To create role, run this command, "ansible-galaxy init role-name" replace role-name with your name like below.
 
-      mkdir roles
-      cd roles
-      ansible-galaxy init post-install
+            mkdir roles
+            cd roles
+            ansible-galaxy init post-install
 
-The result will be this message
+      The result will be this message
 
-      - Role post-install was created successfully
+            - Role post-install was created successfully
 
-Enter into roles folder and run tree command, the role command created a structured folder tree. 
+4. Enter into roles folder and run tree command, the role command created a structured folder tree. 
 
-      cd roles
-      tree
+            cd roles
+            tree
 
-Copy all pertinent files to the role
+5. Copy all pertinent files to the role
 
-      # Copy group_vars/all, host_vars/ and any variable in provisioning.yaml file.Paste them under vars/main.yaml
-      cd exercise14
-      cat group_vars/all
+            # Copy group_vars/all, host_vars/ and any variable in provisioning.yaml file.Paste them under vars/main.yaml
+            cd exercise14
+            cat group_vars/all
 
-      # Remove group_vars and host_vars after copy the variables
-      rm -rf group_vars host_vars
+            # Remove group_vars and host_vars after copy the variables
+            rm -rf group_vars host_vars
 
-      # Copy all files from from files folder to roles/post-install/files
-      cp files/* roles/post-install/files/
+            # Copy all files from from files folder to roles/post-install/files
+            cp files/* roles/post-install/files/
 
-      # Copy all templates
-      cp templates/* roles/post-install/templates/
+            # Copy all templates
+            cp templates/* roles/post-install/templates/
+            
+            # Clean up the playbook
+            cat provisioning.yaml
+
+            # Copy Handlers section and paste
+            sudo vim roles/post-install/handlers/main.yml 
+            # Count the tabs and replace so there is no space in between
+            :%s/^    //
+            
+            #copy tasks section from provisioning.yaml and paste it
+            sudo vim roles/post-install/tasks/main.yml
+
+            # Count the tabs and replace so there is no space in between
+            :%s/^    //
+
+            # Remove variables, tasks and handlers section from provisioning.yaml
+            sudo vim provisioning.yaml
+            roles:
+            - post-install
       
-      # Clean up the playbook
-      cat provisioning.yaml
+            # Remove files folder and templates
+            rm -rf files templates
 
-      # Copy Handlers section and paste
-      sudo vim roles/post-install/handlers/main.yml 
-      # Count the tabs and replace so there is no space in between
-      :%s/^    //
+            # Open tasks remove /templates because it would check the folder in the roles know where to find it. Add ".j2" extension to the template.
+            sudo vim roles/post-install/tasks/main.yml
+
+
+6. Updating ntp server for another region
+
+            cp -r exercise14 exercise15
+            cd exercise14
+
+7. Move the variables from vars to defaults
       
-      #copy tasks section from provisioning.yaml and paste it
-      sudo vim roles/post-install/tasks/main.yml
+            cat roles/post-install/vars/main.yml 
+            sudo vim roles/post-install/defaults/main.yml 
+8. Overriding ntp defaults in the vars in defaults file. change [ntp](https://www.ntppool.org/en/) server. The changes of the file [here](./vprofile/exercise15/provisioning.yaml).
 
-      # Count the tabs and replace so there is no space in between
-      :%s/^    //
+            0.africa.pool.ntp.org
+            0.africa.pool.ntp.org
+            0.africa.pool.ntp.org
+            0.africa.pool.ntp.org
 
-      # Remove variables, tasks and handlers section from provisioning.yaml
-      sudo vim provisioning.yaml
-      roles:
-        - post-install
-  
-      # Remove files folder and templates
-      rm -rf files templates
+      More info on role check [here](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-directory-structure)
 
-      # Open tasks remove /templates because it would check the folder in the roles know where to find it. Add ".j2" extension to the template.
-      sudo vim roles/post-install/tasks/main.yml
+      To make your life easier there are also already made roles by the community members, here is the [reference](https://galaxy.ansible.com/ui/).
 
+      Search for a role, for example if you want to install a [java role](https://galaxy.ansible.com/ui/standalone/roles/?page=1&page_size=10&sort=-created&keywords=java). Documentation for this particular role, [here](https://galaxy.ansible.com/ui/standalone/roles/shaneholloman/java/documentation/).
 
-Updating ntp server for another region
-
-      cp -r exercise14 exercise15
-      cd exercise14
-
-Move the variables from vars to defaults
-      
-      cat roles/post-install/vars/main.yml 
-      sudo vim roles/post-install/defaults/main.yml 
-Overriding ntp defaults in the vars in defaults file. change [ntp](https://www.ntppool.org/en/) server. The changes of the file [here](./vprofile/exercise15/provisioning.yaml).
-
-      0.africa.pool.ntp.org
-      0.africa.pool.ntp.org
-      0.africa.pool.ntp.org
-      0.africa.pool.ntp.org
-
-More info on role check [here](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-directory-structure)
-
-To make your life easier there are also already made roles by the community members, here is the [reference](https://galaxy.ansible.com/ui/).
-
-Search for a role, for example if you want to install a [java role](https://galaxy.ansible.com/ui/standalone/roles/?page=1&page_size=10&sort=-created&keywords=java). Documentation for this particular role, [here](https://galaxy.ansible.com/ui/standalone/roles/shaneholloman/java/documentation/).
-
-      ansible-galaxy role install shaneholloman.java
+            ansible-galaxy role install shaneholloman.java
 
 The role will be downloaded and get stored here
 
       /home/ubuntu/.ansible/roles/shaneholloman.java
 
 To use the role, paste it under roles
+            
       sudo vim provisioning.yaml
       roles:
         - shaneholloman.java
@@ -756,7 +779,7 @@ Just like any EC2 server provisioning we will follow the steps of the console [p
 
 ### 1. Authentication
 
-   1. Create an IAM user
+   - Create an IAM user
       - Go to IAM > Users > Create user
         - user nam: "ansibleadmin"
       - Hit Next
@@ -767,7 +790,7 @@ Just like any EC2 server provisioning we will follow the steps of the console [p
         - Key: "Name"
         - Value: "Ansible User"
       - Hit Create user
-      - Click on Ansibleadmin > Security credentials > Access keys >  Create access keycreate-ec2-instance.yml
+      - Click on Ansibleadmin > Security credentials > Access keys >  Create access key create-ec2-instance.yml
         - Use case
           - Select "Command Line Interface (CLI)"
           - Check the Confirmation box
