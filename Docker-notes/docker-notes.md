@@ -66,7 +66,7 @@ Docker containers that run in Docker Engine:
 
 - **Secure**: Applications are safer in containers and Docker provides the strongest default isolation capabilities in the industry
 
-### Docker Installation
+### Docker Engine Installation
 
 - Linux or Windows
 - Windows Containers runs on Windows OS
