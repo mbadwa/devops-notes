@@ -303,13 +303,6 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
 - Log into Domain Registrar(GoDaddy) 
   - Create NS records for subdomain pointing to Route 53 hosted zones NS servers
 
-    Similar to this:
-
-        ns-826.awsdns-39.net.
-        ns-1456.awsdns-54.org.
-        ns-1629.awsdns-11.co.uk.
-        ns-410.awsdns-51.com.
-
 #### Kops K8s
 
   1. Launch an EC2 instance
