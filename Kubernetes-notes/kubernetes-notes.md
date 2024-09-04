@@ -7,7 +7,7 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 - Storage orchestration
 - Automated rollouts and rollbacks
 - Automatic bin packing
-  - Placing the pod/container on the right node where it gets right resources to run based on the requirements
+  - Placing the pod on the right node where it gets right resources to run based on the requirements
 - Self-healing
   - Containers get replaced when one fails automatically
 - Secret and configuration management
@@ -16,14 +16,14 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 ![alt](./img/kubernetes.png)
 ### Master node/Control Plane
 
--  It is the node that manages worker nodes. You connect to Master node and give instructions to it to run so and so containers. It takes the action based on the requirements. In Master node you have four services API Server, Schedular, Controller Manager and etcd. You can also add other services as addons, the above four main services in Control Plane.
+-  It is the node that manages worker nodes. You connect to Master node and give instructions to it to run so and so containers. It takes the action based on the requirements. In Master node, you have four services; API Server, Schedular, Controller Manager and etcd. You can also add other services as addons, the above are the four main services in Control Plane. Let's get a breakdown of functionality of each service.
 
 #### Kube API Server
 
-- This is the main hero! Handles all the requests and enable communication across all stack services. It handles all incoming and outgoing communications in a Kubernetes cluster. When you want to send instructions to Kubernetes Kube API Server is going to receive that and pass it over to other services, i.e. Scheduler, etcd, Control Manager and worker nodes.
-- Component on the Master exposes the Kubernetes API. If one would like can also build a tool that integrates with Kubernetes API, or a use a third party tool altogether that integrates with Kubernetes like, monitoring agents, logging agents, web dashboards.
+- This is the main hero! Handles all the requests and enable communication across all stack services. It handles all incoming and outgoing communications in a Kubernetes cluster. When you want to send instructions to Kubernetes, Kube API Server is going to receive that and pass it over to other services, i.e. Scheduler, etcd, Control Manager and worker nodes.
+- A component on the Master exposes the Kubernetes API. If one would prefer, can also build a tool that integrates with Kubernetes API, or a use a third party tool altogether that integrates with Kubernetes like, monitoring agents, logging agents, web dashboards.
 - It is the frontend of for the Kubernetes control plane
-- Admins connect to it through **Kubectl** CLI
+- Admins connect to it through **Kubectl CLI**
 - There is a Web Dashboard that can be integrated with API Server
 - And many more integrations
  
@@ -32,13 +32,13 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 - **etcd** is a key value store that stores all the information of your Kubernetes cluster. 
 - It is consistent and highly-available key value store used as Kubernetes' backing store for all cluster data
 - Kube API stores and retrieves information from it
-- It will have all the information run time and it should be backed up regularly. If it fails you lose data and you wouldn't know what pod is running where etc. The container will still run but you'll lose the information.
+- It will have all the information of runtime and it should be backed up regularly. If it fails, you lose data and you wouldn't know what pod is running where etc. The container will still run but you'll lose the information.
 - It stores the current state of everything in a cluster
 
 #### Schedular
 
-- **Schedular** is going to schedule your container on the right node/vm
-- It watches newly created pods/containers that have no node assigned and selects a node for them to run on. It sends information to a worker node telling it, 'hey!' you need to run this container
+- **Schedular** is going to schedule your container on the right node
+- It watches newly created pods that have no node assigned and selects a node for them to run on. It sends information to a worker node telling it, 'hey!' you need to run this container
 - It takes into account several factors to decided the scheduling
   - Individual and collective resource requirements 
   - Hardware/software/policy constraints
@@ -51,7 +51,7 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 - **Controller Manager** is actually a group of controller separate services running.
 - To reduce complexity, they are all compiled into a single binary and run in a single process
 - These controllers include:
-  - **Node Controller:** Responsible to monitoring/noticing and responding when nodes go down
+  - **Node Controller:** Responsible for monitoring/noticing and responding when nodes go down
   - **Replication Controller:** Responsible for maintaining the correct number of pods for every replication controller object in the system. If a pod goes down, it would do auto healing.
   - **Endpoints Controller:** Populates the Endpoints object (that is, joins Services and Pods)
   - **Service Account and Token Controllers:** Create default accounts and API access tokens for new namespace. Manages authorization and authentication
@@ -61,13 +61,13 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 - It is comprised of three services namely; Kubelet, Proxy and the Docker Engine
 
 - **Kubelet:** is an agent that runs on every node in the cluster. It makes sure that containers are running in a pod. It listens to Kubernetes master's commands/requests.
-- When a Schedular decides that it is going to run a particular container in a certain pod, it assigns the task to a Kubelet. The Kubelet is going to fetch the image and run the container from it. Basically it does the heavy lifting. As we run the commands docker run -p -v. Kubelet will be doing those tasks.
+- When a Schedular decides that it is going to run a particular container in a certain pod, it assigns the task to a Kubelet. The Kubelet is going to fetch the image and run the container from it. Basically, it does the heavy lifting. As we run the commands docker run -p -v. Kubelet will be doing those tasks.
 
 - **Kube Proxy:** is a network proxy that runs on each and every node in your cluster
 - You can set Network Rules
   - Rules to allow network communications to your Pods inside or outside of your cluster
 
-- **Control Runtime:** Kubernetes supports several container run times
+- **Control Runtime:** Kubernetes supports several container runtimes
   - Docker
   - Containerd
   - Cri-o, rktlet
@@ -85,17 +85,19 @@ Kubernetes is not a replacement of Docker Engine rather it manages Docker Engine
 ![alt](./img/K8sWorkflow.png)
 
 1. An admin sends command instructions to the Kubernetes API Server in the Master Node through Kubectl
-2. The Master Node has an API Server that enables communication, Controller Manager will monitor worker node, manage authentication and manages replication, Scheduler decides on which node your container will be running and etcd stores information
-3. Worker node you have kubelet which is the agent that fetches the image, run the containers, map the volumes, etc.
-4. Kube proxy is a network proxy allow or disallowing traffic to and from out the Kubernetes cluster. Exposing ports to outside world, you do it through Kube proxy, setting network rules.
+2. The Master Node has an API Server that enables communication, Controller Manager will monitor worker node, manage authentication and manages replication. Scheduler decides on which node your container will be running and etcd stores information
+3. The Worker node has kubelet which is the agent that fetches the image, run the containers, map the volumes, etc.
+4. Kube proxy is a network proxy, allowing or disallowing traffic to and from, in or out of the Kubernetes cluster. Exposing ports to outside world, you do it through Kube proxy, setting network rules, etc.
 5. Docker Engine is where your containers will be running.
 
 
 ### PODS
 
+What relation does a Pod have with a container? It's the same relation a VM has with a service running inside it. For example a Tomcat service is running in a VM, the VM will provide all the resources to the Tomcat service such as RAM, CPU, Storage, Network etc. The Service will just use it. Similarly, a Pod provides all the resources to a container, a container will be running inside a Pod. The container will be like a process and a pod will be like a VM. Of course, here we are talking of isolation not about virtualization. Why does Kubernetes uses pod instead of running containers directly on its nodes? The reason is that Kubernetes can run different container runtime environments like Docker, Containerd, etc. If there is no existence of a pod, there will be no abstraction. Pod uses standard set of commands, standard set of configuration etc that can be used on those different runtime environments. This makes it possible not to be concerned with what type of container ends up running in a pod, no matter what technology is running behind the scenes.
+
 ![alt](./img/PODS.png)
 
-What relation does a Pod have with a container? It's the same relation a VM has with a service running inside it. For example a Tomcat service is running in a VM, the VM will provide all the resources to the Tomcat service such as RAM, CPU, Storage, Network etc. The Service will just use it. Similarly a Pod provides all the resources to a container, a container will be running inside a Pod. Container will be like a process and a pod will be like a VM. Of course here we are talking of isolation not about virtualization. Why does Kubernetes uses pod instead of running containers directly on its nodes? The reason is that Kubernetes can run different container runtime environments like Docker, Containerd, etc. If there no existence of a pod there will be no abstraction, it uses standard set of commands, standard set of configuration etc. This doesn't care what type of container ends up running in a pod, no matter what technology is running behind the scene.
+
 
 ##### Example above
 
@@ -106,20 +108,19 @@ What relation does a Pod have with a container? It's the same relation a VM has 
 
 ### Should You Run a Single Container in a POD?
 
-It depends
-
-![alt](./img/Nodes.png)
+It depends;
 
 1. Ideally you would see one pod to one container ratio like in Node Server 1
 2. In Node Server 2 and 3 you have 3 containers, INIT container starts, run some commands then it dies, then the main container starts with the sidecar container. Sidecar container's work is to assist the main container. For example streaming logs or it could be a monitoring agent. However, at any given time you should have the main container only running in the pod.
 
+![alt](./img/Nodes.png)
 
 ### Overlay Network
 ![alt](./img/Network%20Overlay.png)
 
 Overlay Network could be likened to a VPC where all the resources within it are connected. Every node will have a subnet.
 
-- So if Node 1 is Tomcat and Pod 6 is MySQL they can communicate since they are in the same Overlay Network.
+- So if Node 1 is Tomcat and Pod 6 is MySQL, they can communicate since they are in the same Overlay Network.
 - Every node will have like a subnet/LAN running inside it. The bridge0 will act like a switch for the subnet
 - All the pods within Node 1 will be able to communicate to each other using bridge0.
 - When pods in Node 1 need to connect to other pods in other Nodes, for instance Node 2 or 3 they send the traffic to **wg0 - 10.90.1.1** which acts as a router.
@@ -133,7 +134,7 @@ Overlay Network could be likened to a VPC where all the resources within it are 
   - One Node Kubernetes cluster on your computer
 - Kubeadm: Enterprise grade for production
   - Multi node Kubernetes Cluster
-  - Can be created on any Platforms VMs, EC2, Physical machines, etc
+  - Can be created on any Platform, be it VMs, EC2, Physical machines, etc
 - Kops: Most stable way to run production Kubernetes
   - Multi node Kubernetes Cluster on AWS, GCP, DigitalOcean, and OpenStack
 
@@ -142,6 +143,8 @@ Overlay Network could be likened to a VPC where all the resources within it are 
 Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) or Docker Engine, you need to have installed Docker Engine or VirtualBox before installing Minikube.
 
 [Installing Minikube](Installing%20Minikube.md) on Ubuntu 20.04 LTS or 22.04 LTS
+
+#### Minikube K8s Hands on
 
 1. Clone source [code](https://github.com/devopshydclub/vprofile-project)
 
@@ -293,7 +296,7 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
 
 - Domain for Kubernetes DNS records
     - e.g. mbadwa.com from **GoDaddy**
-- Create a Linux VM and setup in AWS or Vagrant VM
+- Create a Linux VM and set it up in AWS or Vagrant VM
   - kops, kubectl,ssh keys, awscli 
 - Login to AWs account and setup
   - S3 bucket, IAM User for AWSCLI, Route53 Hosted Zone
@@ -412,18 +415,23 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
             --node-count=2 --node-size=t3.small --master-size=t3.medium --dns-zone=kubevpro.mbadwa.com \
             --node-volume-size=8 --master-volume-size=8
 
-            # Finally configure your cluster with: kops update cluster --name kubevpro.mbadwa.com --yes --admin
+            # Finally, configure your cluster with: 
+            kops update cluster --name kubevpro.mbadwa.com --yes --admin \
             kops update cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin
   
   13. Wait 25-30 min then validate the cluster
 
             kops validate cluster --state=s3://kops-mbadwa-bucket
   
-  14. When kops creates a cluster it also creates a kube config file for kubectl that used to connect to the cluster
+  14. Go to EC2 > instances > nodes-us-east-1a.kubevpro.mbadwa.com > Security > Security Groups > Edit
+      - Add rule
+        - All Traffic from MY IP
+  
+  15. When kops creates a cluster it also creates a kube config file for kubectl that used to connect to the cluster
   
             cat ~/.kub/config
 
-  15. Kops creates autoscaling groups, VPC, adds new records in Route 53. You can verify by checking them out
+      Kops creates autoscaling groups, VPC, adds new records in Route 53. You can verify by checking them out
   16. Clean once done
 
             kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
@@ -945,6 +953,284 @@ Output
       web-02     1/1     Running             0               5s
 
 Logs is where you are likely to find errors causation most of the time. 
+
+## Service
+
+A way to expose an application running on a set of Pods as a network service. Similar to Load Balancers.
+
+### Reasons
+
+Why Service as apposed to port mapping. Kubernetes Pods are mortal. They are born and when they dies, they are not resurrected. If they use a Deployment to run an app, it can create and destroy Pods dynamically.
+
+Each Pod gets its own IP address, however in a Deployment, a set of Pods running in one moment in time could be different from a set of Pods running an application a moment later.
+
+This leads to a problem: if some set of Pods (Backend) that provides functionality to other Pods (Frontend) inside your cluster, how do th frontend find out and keep track of which IP address to connect to, so that the frontend can use the backend part of the workload?
+
+Enter *Services.*
+
+Service provides an endpoint like ELBs that provides access to resources behind the ELB, i.e. EC2 instances. Similarly, a set of Pods will have dynamic endpoints attached so the traffic reaches the endpoint and then passed over to the pods.
+
+### 3 Types of Services
+
+1. **NodePort** is similar to port mapping seen in Docker whereby you have a host port to container port mapping. This is mainly for non prod purposes. Not for exposing front end in the production environment. This is used only to expose your pod to the outside network.
+2. **ClusterIP** is used for internal communication, if say, you want to connect MySQL service to a Tomcat service then you can use a ClusterIP attached to each service. There won't be port mapped to the Node.
+3. **LoadBalancer** is to expose to outside network for production use cases. Say, users need to access to a Tomcat service Pod in production in AWS, then we create a Pod LoadBalancer that will map to AWS ELB which will be public facing.
+
+### K8s Services 
+
+![alt](/Kubernetes-notes/img/K8s-Services.png)
+
+Each set of Pods will have services in front of it. It could be Nginx on the frontend or RabbitMQ set of Pods in the Backend, each Pod/Set of Pods will have a service in front of it. This facilitates internal communication as well as external.
+
+### NODE
+
+![alt](./img/K8s-NODE.png)
+
+- A request coming from outside the network, i.e. 172.20.34.67:30001 will hit the Node port, then be routed internally to the service which handles internal traffic routing.
+- A worker node will have a set of pods, in this case a two Nginx Pods. Each Pod will have a Label, an IP address and a container running inside of it exposed on port 80.
+- A service will be like a LoadBalancer in front of the Pods, it will have a static IP address which will not change until you delete it. It'll have an internal frontend port, this is used for internal communication. The backend port will be the port number of the container.
+- So, service, just like a loadbalancer (100.50.10.250:80) it has a frontend port and a backend port (Backend Port: 80).
+- How does the service know to which Pod/(s) to send the traffic to? It matches the traffic with a Label Selector. Any pod matching that label will receive traffic matched to port 80.
+- The Node port service should have matching backend port with container ports as well as matching label Selectors.
+
+Example of service definitions
+
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels: 
+        app: webapp-service
+      name: webapp-service
+      spec:
+        type: NodePort
+        ports:
+        - targetPort: 80
+          port: 80
+          nodePort: 30005
+          protocol: TCP
+        selector:
+          app: frontend
+
+**Kind** is **Service**, **apiVersion v1**, **metadata** it's value in **name**, **spec** you are choosing the service type which is **NodePort**, **targetPort** represents the backend port, **port 80** means it's a frontend port but serves internal traffic only. **nodePort** is for the outside network. Any request sent to the **nodePort** will be forwarded to any pod that has a label called **frontend** on port 80.
+
+To create a Node Service
+
+    $ kubectl create -f service-defs.yml
+
+Output
+
+    service/webapp-service created
+
+To get the service
+
+    $ kubectl get svc
+
+Output
+
+    NAME           TYPE        CLUSTER-IP      EXTERNAL-IP       PORTS
+    kubernetes     ClusterIP   10.96.0.1       <none>           443/TCP
+    webapp-service NodePort    10.110.3.28     <none>           80:30005/TCP
+
+To describe the service
+
+    $ kubectl describe svc webapp-service
+
+Output
+
+    Name:                       webapp-service
+    Namespace:                  default
+    Labels:                     app=webapp-service
+    Annotations:                <none>
+    Selector:                   app=frontend
+    Type:                       NodePort
+    IP:                         10.110.3.28
+    Port:                       <unset>   80/TCP
+    TargetPort:                 80/TCP
+    NodePort:                   <unset>   30005/TCP
+    Endpoints:                  172.17.0.4:80
+
+### NODEPort Services Demo in kOps Server
+
+![alt](./img/NODEPortDemo.png)
+
+#### NodePort Service Setup
+
+1. Create a pod definitions [file](web-app-defs.yml) 
+
+        $ mkdir -p definitions/webapp-defs
+        $ cd webapp-defs
+        $ vim webapp-defs.yml
+
+2. Create a nodePort service definitions [file](./vproapp-nodeport.yaml)
+
+        $ vim vproapp-nodeport.yaml
+
+3. Run the pod & check the pod
+
+        $ kubectl create -f web-app-defs.yml
+
+        $ kubectl get pod
+    
+4. Create a nodPort service
+
+        $ kubectl create -f vproapp-nodeport.yaml
+
+6. Check svc
+
+        $ kubectl get svc
+
+    Output
+
+        NAME                 TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+        webapp-service   NodePort    100.64.199.148   <none>        8090:30001/TCP   22s
+        kubernetes           ClusterIP   100.64.0.1       <none>        443/TCP          48m
+
+    The Port 8090 is internal frontend port while 30001 is an external frontend port
+     
+7. Describe service 
+
+        $ kubectl describe svc webapp-service
+
+  Output
+
+        Name:                     helloworld-service
+        Namespace:                default
+        Labels:                   <none>
+        Annotations:              <none>
+        Selector:                 app=vproapp
+        Type:                     NodePort
+        IP Family Policy:         SingleStack
+        IP Families:              IPv4
+        IP:                       100.64.199.148
+        IPs:                      100.64.199.148
+        Port:                     <unset>  8090/TCP
+        TargetPort:               vproapp-port/TCP
+        NodePort:                 <unset>  30001/TCP
+        Endpoints:                100.96.2.1:8080
+        Session Affinity:         None
+        External Traffic Policy:  Cluster
+        Internal Traffic Policy:  Cluster
+        Events:                   <none>
+
+
+    # Endpoints, even though we gave a name as the port, K8s automatically mapped the endpoint to an IP internally
+
+        Endpoints:                100.96.2.1:8080
+
+8. Further verify the Pod IP mapping by grep
+
+        $ kubectl describe pod | grep IP
+
+    Output
+
+        IP:               100.96.2.1
+        IPs:
+          IP:  100.96.2.1
+
+9. Access any worker node with its public IP
+
+        node-publicIP:30001
+
+10. Delete nodePort service
+
+        $ kubectl delete svc webapp-service
+
+### LoadBalancer
+
+![alt](/Kubernetes-notes/img/LoadBalancer.png)
+
+### LoadBalancer Demo in kOps Server
+
+![alt](/Kubernetes-notes/img/ELB%20In%20Action.png)
+
+1. Create an ELB Service [file](vproapp-loadbalancer.yaml)
+
+        $ cp vproapp-nodeport.yaml cp vproapp-loadbalancer.yaml
+        $ vim vproapp-loadbalancer.yaml
+        $ kubectl create -f vproapp-loadbalancer.yaml
+
+2. Lets check
+
+        $ kubectl get svc
+
+    Output
+
+        NAME             TYPE           CLUSTER-IP      EXTERNAL-IP                                                              PORT(S)        AGE
+        kubernetes       ClusterIP      100.64.0.1      <none>                                                                   443/TCP        137m
+        webapp-service   LoadBalancer   100.64.140.16   a12afb2d9fc2a4a6289e8463de855c90-245401602.us-east-1.elb.amazonaws.com   80:30396/TCP   30s
+
+3. Go to EC2 > Load Balancing > Load Balancers > Click-on-loadbalancer > Target instances
+   
+        # Copy LoadBalancer DNS URL and paste it in a browser
+        a12afb2d9fc2a4a6289e8463de855c90-245401602.us-east-1.elb.amazonaws.com
+
+      Similar to the URL above
+
+
+### ClusterIP Service
+
+ClusterIP service is for internal communication within backend services or between backend and frontend services.
+
+![alt](./img/K8s-ClusterIP.png)
+
+ClusterIP Service yaml [file](tom-svc-clusterip.yml)
+
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: app-service
+    spec:
+      type: ClusterIP
+      ports:
+      - targetPort: 8080
+        port: 8080
+        protocol: TCP
+      selector:
+        app: backend
+
+
+### ClusterIP & NodePort
+
+![alt](./img/ClusterIP%20&%20NodePort.png)
+
+**Clean up**
+
+ 1. Get all in the current namespace
+  
+         $ kubectl get all
+
+    Output
+
+        NAME          READY   STATUS    RESTARTS   AGE
+        pod/vproapp   1/1     Running   0          3h7m
+
+        NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP                                                              PORT(S)        AGE
+        service/kubernetes       ClusterIP      100.64.0.1      <none>                                                                   443/TCP        5h6m
+        service/webapp-service   LoadBalancer   100.64.140.16   a12afb2d9fc2a4a6289e8463de855c90-245401602.us-east-1.elb.amazonaws.com   80:30396/TCP   169m
+  
+ 2. Delete pod
+        
+        $ kubectl delete pod pod/vproapp
+ 3. Delete Service
+
+        $ kubectl delete svc service/webapp-service
+
+ 4. Verify
+   
+        $ kubectl get all
+
+    Output
+
+        NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+        service/kubernetes   ClusterIP   100.64.0.1   <none>        443/TCP   5h14m
+
+ 5. kOps delete cluster
+
+        $ kops delete cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
+
+## Replica Set
+
 
 # References
 
