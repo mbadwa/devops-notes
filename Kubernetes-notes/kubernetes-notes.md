@@ -1224,6 +1224,565 @@ ClusterIP Service yaml [file](tom-svc-clusterip.yml)
 
 ## Replica Set
 
+A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time. Usually, you define a Deployment and let that Deployment manage ReplicaSets automatically. A further reading [here](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+
+Maintains a replica of your pod. You have a Pod and users are accessing it, for some reason the pod goes down, the users can't access it any longer. In this case someone needs to log in delete the pod and recreate the pod to fix the issue. ReplicaSet object you mention the pods you want to run and when any pod crushes it will automatically create a replacement pod. This negates the need of manual pod replication work. Minimum number of replicas can be one. This basically also handles auto scaling.
+
+For health checks you need to have at least one replica set configured, when your pod goes down the health check will kick in to deploy a new pod. Scheduler distributes replicas across nodes. This is for high availability, say, an entire node crushes, you'll still have pods running on the other nodes.
+
+### Hands on
+
+1. Start you minikube/vm server
+
+       $ minikube start
+
+2. Create pods with ReplicaSet yaml [file](replset.yaml)
+      
+       $ kubectl apply -f replset.yaml
+
+
+3. Check if 3 pods were created
+
+       $ kubectl get rs
+
+   Output
+
+       NAME       DESIRED   CURRENT   READY   AGE
+       frontend   3         3         3       6m45s
+
+4. List running pods
+
+       $ kubectl get pod
+
+   Output
+
+       NAME             READY   STATUS    RESTARTS   AGE
+       frontend-llzkw   1/1     Running   0          4m12s
+       frontend-m92n7   1/1     Running   0          4m12s
+       frontend-w8dlr   1/1     Running   0          4m12s
+
+5. Delete 2 pods to see if they get recreated
+
+       $ kubectl delete pod frontend-llzkw frontend-m92n7
+   
+   Output
+
+       pod "frontend-llzkw" deleted
+       pod "frontend-m92n7" deleted
+
+6. List pods
+
+       $ kubectl get pod
+
+   Output
+
+       NAME             READY   STATUS    RESTARTS   AGE
+       frontend-cpjtm   1/1     Running   0          21s
+       frontend-w8dlr   1/1     Running   0          14m
+       frontend-wp5xt   1/1     Running   0          21s
+
+7. Scale down or scale up, best way is declarative. Change ReplicaSet number to 5
+
+       $ vim replset.yaml
+       $ kubectl apply -f replset.yaml
+
+   Output
+
+       replicaset.apps/frontend configured
+
+8. List rs
+    
+       $ kubectl get rs
+
+   Output
+   
+       NAME       DESIRED   CURRENT   READY   AGE
+       frontend   5         5         5       23m
+
+9. Scaling up or down imperatively, not recommended
+
+       $ kubectl scale --replicas=1 rs/frontend
+
+       or
+
+       $ kubectl scale --replicas=1 rs frontend
+
+   Output
+
+       replicaset.apps/frontend scaled
+
+10. List rs
+    
+        $ kubectl get rs
+
+    Output
+  
+        NAME             READY   STATUS    RESTARTS   AGE
+        frontend-w8dlr   1/1     Running   0          26m
+
+11. Another imperative option
+  
+
+        $ kubectl edit rs/frontend
+
+12. Apply the changes
+
+        $ kubectl apply -f replset.yaml
+
+    Output
+
+        replicaset.apps/frontend edited
+
+
+13. Clean up
+
+        $ kubectl delete rs frontend
+
+    Output
+
+        replicaset.apps "frontend" deleted
+
+    Recheck
+
+        $ kubectl get pod
+
+    Output
+
+        No resources found in default namespace.
+
+  Note: The last two methods are not recommended at all, the best way is through manifest files, declarative method.
+
+  ## Deployment
+
+  This is by far the most used object by DevOps to upgrade, rollback in order to do changes gracefully. A deployment controller provides declarative updates for Pods and ReplicaSets.
+
+  Define desired state in a Deployment, and the Deployment controller changes the actual state to the desired state at a controlled rate.
+
+  Deployment creates a ReplicaSet to manage number of Pods
+
+  If for example, you have an image with tag v1 and you would like to upgrade it to v2, you can do that, the upgrade will be done one pod at a time. If something goes wrong the rollback will automatically kick in. This is similar to autoscaling in AWS
+
+![alt](./img/K8s%20Deployment.png)
+
+### Deployment Definitions vs DeploymentController Definitions
+
+A [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) manages a set of Pods to run an application workload, usually one that doesn't maintain state.
+
+A *Deployment* provides declarative updates for [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) and [ReplicaSets](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/).
+
+You describe a *desired state* in a Deployment, and the Deployment Controller changes the actual state to the desired state at a controlled rate. You can define Deployments to create new ReplicaSets, or to remove existing Deployments and adopt all their resources with new Deployments.
+
+![alt](/Kubernetes-notes/img/Deployment%20vs%20ReplicationController.png)
+
+
+#### Deployment
+
+1. Create a deployment definitions [file](nginx-deployment.yaml)
+
+       $ vim nginx-deployment.yaml
+       $ kubectl apply -f nginx-deployment.yaml
+
+   Output
+
+       nginx-deployment.apps/nginx-deployment created
+
+   Check
+  
+       $ kubectl get deploy
+
+   Output
+
+       NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+       nginx-deployment   3/3     3            3           100s
+     
+2. Deployment creates a ReplicaSet
+
+       $ kubectl get rs
+
+   Output
+
+       NAME                          DESIRED   CURRENT   READY   AGE
+       nginx-deployment-77d8468669   3         3         3       4m21s
+
+3. ReplicaSet in turn creates pods
+
+       kubectl get pod
+
+   Output
+
+       NAME                                READY   STATUS    RESTARTS   AGE
+       nginx-deployment-77d8468669-mn5n7   1/1     Running   0          5m59s
+       nginx-deployment-77d8468669-pghgh   1/1     Running   0          5m59s
+       nginx-deployment-77d8468669-w8cd7   1/1     Running   0          5m59s
+
+#### Updating a Deployment
+
+Note:
+A Deployment's rollout is triggered if and only if the Deployment's Pod template (that is, .spec.template) is changed, for example if the labels or container images of the template are updated. Other updates, such as scaling the Deployment, do not trigger a rollout.
+
+1. Update nginx:1.14.2 to nginx:1.16.1
+
+       $ kubectl describe pod nginx-deployment-77d8468669-mn5n7
+
+   Output snippet (Note the version)
+
+       Containers:
+        nginx:
+          Container ID:   docker://5603ebfdc364d2b0b1b0f89101ff90accf441acbaf298e4149925dbdd8822f25
+          Image:          nginx:1.14.2
+
+   Updating the version
+
+       $ kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1
+   
+   Output
+
+       deployment.apps/nginx-deployment image updated
+2. Check the new version
+
+       $ kubectl get deploy
+
+   Output
+
+       NAME                                READY   STATUS    RESTARTS   AGE
+       nginx-deployment-595dff4fdb-9zc7n   1/1     Running   0          2m11s
+       nginx-deployment-595dff4fdb-bpmpb   1/1     Running   0          2m21s
+       nginx-deployment-595dff4fdb-g2nbg   1/1     Running   0          2m10s
+
+   Describe one of the pod
+
+       $ kubectl describe pod nginx-deployment-595dff4fdb-g2nbg
+
+   Output
+
+       Containers:
+        nginx:
+          Container ID:   docker://d9853e4f92137bbd9da5c20b7fe597effa8f056f58367e0a07bcfb778030e025
+          Image:          nginx:1.16.1
+
+
+   Note: You notice pods age and also the version got updated
+
+3. To see the ReplicaSets changes rollout 
+
+       $ kubectl get rs
+
+   Output
+
+       NAME                          DESIRED   CURRENT   READY   AGE
+       nginx-deployment-595dff4fdb   3         3         3       10m
+       nginx-deployment-77d8468669   0         0         0       28m
+
+4. Rolling back the deployment
+
+       $ kubectl rollout status deployment/nginx-deployment
+
+
+   Output
+
+       deployment "nginx-deployment" successfully rolled out
+
+      
+   Describe deployments
+
+       $ kubectl describe deployments
+
+   Check history revision
+
+       $ kubectl rollout history deployment/nginx-deployment 
+
+   Output
+
+       deployment.apps/nginx-deployment 
+       REVISION  CHANGE-CAUSE
+       1         <none>
+       2         <none>
+
+   To roll back to the previous version
+
+       kubectl rollout undo deployment/nginx-deployment
+
+   Output
+
+       deployment.apps/nginx-deployment rolled back
+
+5. Check the changes
+
+       $ kubectl get rs
+
+   Output
+
+       NAME                          DESIRED   CURRENT   READY   AGE
+       nginx-deployment-595dff4fdb   0         0         0       75m
+       nginx-deployment-77d8468669   3         3         3       93m
+
+   Note: The new ReplicaSet has zero pods and the old one has three pods now. You can distinguish the deployments by their name and age, as well.
+
+   Describe one pod
+
+       $ kubectl get pod
+
+   Output
+
+       NAME                                READY   STATUS    RESTARTS   AGE
+       nginx-deployment-77d8468669-m94x2   1/1     Running   0          4m58s
+       nginx-deployment-77d8468669-rvjzz   1/1     Running   0          5m
+       nginx-deployment-77d8468669-trh88   1/1     Running   0          4m57s
+
+   Describe one pod
+
+       $ kubectl describe pod nginx-deployment-77d8468669-trh88 | grep Image
+
+   Output
+
+       68669-trh88 | grep Image
+           Image:          nginx:1.14.2
+           Image ID:       docker-pullable://nginx@sha256:f7988fb6c02e0ce69257d9bd9cf37ae20a60f1df7563c3a2a6abe24160306b8d
+6. Delete the deployment
+   
+        $ kubectl get deploy 
+        
+   Output
+
+        NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+        nginx-deployment   3/3     3            3           103m
+
+   Delete
+
+        $ kubectl delete deploy nginx-deployment
+
+   Output
+
+        deployment.apps "nginx-deployment" deleted
+
+7. Stop minikube
+
+        $ minikube stop && minikube delete
+
+## Commands & Arguments
+
+How can you pass commands and arguments to a container in your Pod? Remember that pod doesn't execute commands, it's the container that runs them. In Dockerfile there are commands declared using CMD which starts the container process and ENTRYPOINT does the same thing, the difference is that it has higher priority. If both ENTRYPOINT and CMD are being used in a Dockerfile, the command in ENTRYPOINT will run first followed by CMD command. Normally you'll have ENTRYPOINT as a command and CMD its argument. 
+
+### Command & Entrypoint
+
+- You have an image named printer and you want to run it, it'll execute "eho hi"
+
+      FROM ubuntu
+      CMD ["echo hi"]
+
+  To run it
+
+      docker run printer
+
+- In Entrypoint you have the same image as below, it will run by running the container and passing the argument "hi", otherwise nothing will be achieved. If there is a command that necessarily needs an argument, the container will fail.
+
+      FROM ubuntu
+      ENTRYPOINT["echo"]
+
+  To run it
+
+      docker run printer hi
+
+- When you build an image with ENTRYPOINT and CMD together, when you run *docker run printer* it will say; "echo hi", and when you run *docker run printer hello* it'll override the argument "hi" command in the CMD and replace it with *hello*.
+
+      FROM ubuntu
+      ENTRYPOINT[echo]
+      CMD["hi"]
+
+#### How to run the commands in Kubernetes
+
+Define a [Command and Arguments](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/) for a Container. 
+
+- The command in the definitions [file](./commands.yaml) will look like this;
+
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: command-demo
+        labels:
+          purpose: demonstrate-command
+      spec:
+        containers:
+        - name: command-demo-container
+          image: debian
+          command: ["printenv"]
+          args: ["HOSTNAME", "KUBERNETES_PORT"]
+        restartPolicy: OnFailure
+
+- Run using minikube or these two playgrounds, killercoda or Play with K8s
+
+      $ kubectl apply -f commands.yaml
+
+  Output
+
+      pod/command-demo created
+
+- Checking with list pod
+
+      $ kubectl get pod
+
+  Output
+
+      NAME           READY   STATUS      RESTARTS   AGE
+      command-demo   0/1     Completed   0          2m27s
+
+  Note: The commands got executed, after that the container died. Hence the "Completed" status.
+- Check logs
+
+      $ kubectl logs command-demo
+
+  Output prints hostname and K8s port
+
+      command-demo
+      tcp://10.96.0.1:443
+
+  Note: These kind of containers are useful when running a short lived process, say, you are running a script to do a certain process and finish. 
+- Test with using variables in a definitions [file](cmd-variable.yaml)
+  
+      env:
+      - name: MESSAGE
+        value: "hello world"
+      command: ["/bin/echo"]
+      args: ["$(MESSAGE)"]
+
+- Checking with list pod
+
+      $ kubectl get pod
+  
+  Output
+      
+      NAME           READY   STATUS      RESTARTS   AGE
+      cmd-variable   0/1     Completed   0          14s
+      command-demo   0/1     Completed   0          18m
+
+- Check logs
+
+      $ kubectl logs cmd-variable
+
+  Output
+
+      hello world
+
+## Volumes
+
+On-disk files in a container are ephemeral, which presents some problems for non-trivial applications when running in containers. One problem occurs when a container crashes or is stopped. Container state is not saved so all of the files that were created or modified during the lifetime of the container are lost. During a crash, kubelet restarts the container with a clean state. Another problem occurs when multiple containers are running in a Pod and need to share files. It can be challenging to setup and access a shared filesystem across all of the containers. The Kubernetes volume abstraction solves both of these problems. For more details, read [here](https://kubernetes.io/docs/concepts/storage/volumes/).
+
+### Mapping to local volume
+
+A local volume represents a mounted local storage device such as a disk, partition or [directory](mysql-defs.yaml).
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: dbpod
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        ports:
+        - containerPort: 3306
+          name: dbpod
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: dbvol
+      volumes:
+      - name: dbvol
+        hostPath:
+          # directory Location on host
+          path: /data
+          # this field is optional
+          type: DirectoryOrCreate
+
+
+- Create the volume definition [file](./mysql-defs.yaml) and secret [file](mysql-secret.yaml)
+
+      $ kubectl apply -f mysql-secret.yaml
+      $ kubectl apply -f mysql-defs.yaml
+
+- Check pod
+  
+      $ kubectl get pod
+
+  Output
+
+      NAME    READY   STATUS    RESTARTS   AGE
+      dbpod   1/1     Running   0          6m28s
+
+  Describe the pod
+
+      $ kubectl describe pod dbpod
+
+  Output
+
+      Name:             dbpod
+      Namespace:        default
+      Priority:         0
+      Service Account:  default
+      Node:             node01/172.30.2.2
+      Start Time:       Thu, 05 Sep 2024 23:38:37 +0000
+      Labels:           <none>
+      Annotations:      cni.projectcalico.org/containerID: 887676f0c8dd6c6a8d3e871d3506537d815edff8590d6ee58b02dcc10509aa6c
+                        cni.projectcalico.org/podIP: 192.168.1.6/32
+                        cni.projectcalico.org/podIPs: 192.168.1.6/32
+      Status:           Running
+      IP:               192.168.1.6
+      IPs:
+        IP:  192.168.1.6
+      Containers:
+        mysql:
+          Container ID:   containerd://a6f5a341f9fb0b1c98c103335cda5184baa59f8499e73fe28fb9dbd1372df0c5
+          Image:          mysql:5.7
+          Image ID:       docker.io/library/mysql@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+          Port:           3306/TCP
+          Host Port:      0/TCP
+          State:          Running
+            Started:      Thu, 05 Sep 2024 23:38:37 +0000
+          Ready:          True
+          Restart Count:  0
+          Environment:
+            MYSQL_ROOT_PASSWORD:  <set to the key 'password' in secret 'mysql-secret'>  Optional: false
+          Mounts:
+            /var/lib/mysql from dbvol (rw)
+            /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-kn964 (ro)
+      Conditions:
+        Type                        Status
+        PodReadyToStartContainers   True 
+        Initialized                 True 
+        Ready                       True 
+        ContainersReady             True 
+        PodScheduled                True 
+      Volumes:
+        dbvol:
+          Type:          HostPath (bare host directory volume)
+          Path:          /data
+          HostPathType:  DirectoryOrCreate
+        kube-api-access-kn964:
+          Type:                    Projected (a volume that contains injected data from multiple sources)
+          TokenExpirationSeconds:  3607
+          ConfigMapName:           kube-root-ca.crt
+          ConfigMapOptional:       <nil>
+          DownwardAPI:             true
+      QoS Class:                   BestEffort
+      Node-Selectors:              <none>
+      Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+      Events:
+        Type    Reason     Age    From               Message
+        ----    ------     ----   ----               -------
+        Normal  Scheduled  7m10s  default-scheduler  Successfully assigned default/dbpod to node01
+        Normal  Pulled     7m10s  kubelet            Container image "mysql:5.7" already present on machine
+        Normal  Created    7m10s  kubelet            Created container mysql
+        Normal  Started    7m10s  kubelet            Started container mysql
+
+- Delete pod
+
+        $ kubectl delete pod dbpod
 
 # References
 
@@ -1231,3 +1790,5 @@ ClusterIP Service yaml [file](tom-svc-clusterip.yml)
 2. [Kubernetes Quick Start](https://kubernetes.io/docs/tasks/tools/)
 3. [kOps](https://kops.sigs.k8s.io/getting_started/install/)
 4. [K8s Documentation Home Page](https://kubernetes.io/docs/home/)
+5. [Killercoda Kubernetes playground](https://killercoda.com/playgrounds/scenario/kubernetes)
+6. [Play with Kubernetes playground](https://labs.play-with-k8s.com/)

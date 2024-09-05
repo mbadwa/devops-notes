@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-controller
+spec:
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: tomcat-container
+        image: tomcat
+        ports:
+        - name: app-port
+          containerPort: 8080
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
