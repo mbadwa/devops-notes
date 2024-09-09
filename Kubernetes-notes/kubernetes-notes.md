@@ -1222,7 +1222,7 @@ ClusterIP Service yaml [file](tom-svc-clusterip.yml)
 
         $ kops delete cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
 
-## Replica Set
+Replica## Replica Set
 
 A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time. Usually, you define a Deployment and let that Deployment manage ReplicaSets automatically. A further reading [here](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
 
@@ -1783,6 +1783,336 @@ A local volume represents a mounted local storage device such as a disk, partiti
 - Delete pod
 
         $ kubectl delete pod dbpod
+
+## Config Map
+
+A ConfigMap is an API object used to store non-confidential data in key-value pairs. [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a [volume](https://kubernetes.io/docs/concepts/storage/volumes/).
+
+A ConfigMap allows you to decouple environment-specific configuration from your [container images](https://kubernetes.io/docs/reference/glossary/?all=true#term-image), so that your applications are easily portable.
+
+How to inject variables and configuration into the pods, you can do it while running the pods, you can also inject variables and configuration through the definitions file. The Pod definitions code below shows the env section doing just that. Since applications changes and you may need to create more variables and configurations changes, you need to manage these inevitable changes. You need to store the variables and configuration changes in one place. This is where Config Maps comes in, you set and inject variables/files in a Pod.
+
+**Caution:**
+ConfigMap does not provide secrecy or encryption. If the data you want to store are confidential, use a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) rather than a ConfigMap, or use additional (third party) tools to keep your data private.
+
+More on Config Maps [here](https://kubernetes.io/docs/concepts/configuration/configmap/)
+
+**Environment Variables**
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: dbpod
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+        - name: MYSQL_DATABASE
+          value: accounts 
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        ports:
+        - containerPort: 3306
+          name: dbpod
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: dbvol
+      volumes:
+      - name: dbvol
+        hostPath:
+          # directory Location on host
+          path: /data
+          # this field is optional
+          type: DirectoryOrCreate
+
+### Creating Config Maps | Imperative
+
+Config Map is basically a collection of variables. The imperative method should be avoided at all cost, however, you need to know how to do it.
+
+- Create a Config Maps
+
+      $ kubectl create configmap db-config --from-literal=MYSQL_DATABASE=accounts \
+      --from-literal=MYSQL_ROOT_PASSWORD=some-complex-pass 
+
+  Output
+
+      configmap/db-config created
+
+- List Config Maps
+
+      $ kubectl get cm
+
+  Output
+
+      NAME          DATA      AGE
+      db-config     2         5s
+- To see the content/keys
+
+      $ kubectl get cm db-config -o yaml
+
+  Output
+
+      apiVersion: v1
+      data: 
+         MYSQL_DATABASE: accounts
+         MYSQL_ROOT_PASSWORD: some-complex-pass
+      Kind: ConfigMap
+- Describe a Config Map
+
+      $ kubectl describe cm db-config
+
+  Output
+
+      Name:           db-config
+      Namespace:      default
+      Labels:         <none>
+      Annotations:    <none>
+
+      Data
+      -----
+      MYSQL_DATABASE
+      -----
+      accounts
+      MYSQL_ROOT_PASSWORD:
+
+### Creating Maps | Declarative
+
+Almost always use a declarative method to create a Config Map
+
+- Create a config map
+
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: db-config
+      data:
+        MYSQL_ROOT_PASSWORD: some-complex-pass
+        MYSQL_DATABASE: accounts
+
+- Apply the config map
+
+      $ kubectl create -f db-cm.yml
+
+  Output
+
+      configmap/db-config created
+#### How to inject the stored variables in CM into a pod
+
+You can choose to inject all the variables from a Config Map or you can selectively inject.
+
+- **Injecting all variables into a pod**
+  
+  In this case all the variables will be exported into the container
+
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: db-pod
+        labels:
+          app: db
+          project: infinity
+      spec:
+        containers:
+          - name: mysql-container
+            image: mysql:5.7 
+            envFrom:
+              - configMapRef:
+                name: db-config 
+
+- **Injecting variables selectively into a pod**
+  
+  If on the other hand you would like to selectively inject keys, then you go with the ConfigMapKeyRef option
+
+      spec:
+        containers:
+          - name: mysql-container
+            image: mysql:5.7
+            env:
+              - name: DB_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: db-config
+                    key: DB_HOST
+
+### Config Map Definitions Example File
+
+Under Data section there are four keys/variables, *player_initial_lives* with value *"3"*, *ui_properties_file_name* with its value *"user-interface.properties"*, *game.properties* with its values *enemy.types=aliens,monsters and player.maximum-lives=5* and *user-interface.properties* with its four values, *color.good=purple, color.bad=yellow and allow.textmode=true*.
+
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: game-demo
+      data:
+        # property-like keys; each key maps to a simple value
+        player_initial_lives: "3"
+        ui_properties_file_name: "user-interface.properties"
+
+        # file-like keys
+        game.properties: |
+          enemy.types=aliens,monsters
+          player.maximum-lives=5    
+        user-interface.properties: |
+          color.good=purple
+          color.bad=yellow
+          allow.textmode=true    
+
+Note: You can also store multiline content as a file in a container, for example the above values.
+
+- Create a [config map](samplecm.yaml)
+
+        $ kubectl apply -f samplecm.yaml
+- Check the config map
+
+        $ kubectl get cm 
+
+  Output
+
+        NAME               DATA   AGE
+        game-demo          4      85s
+        kube-root-ca.crt   1      35d
+
+- Check with yaml output
+
+        $ kubectl get cm game-demo -o yaml
+
+  Output
+
+        apiVersion: v1
+        data:
+          game.properties: "enemy.types=aliens,monsters\nplayer.maximum-lives=5    \n"
+          player_initial_lives: "3"
+          ui_properties_file_name: user-interface.properties
+          user-interface.properties: "color.good=purple\ncolor.bad=yellow\nallow.textmode=true
+            \   \n"
+        kind: ConfigMap
+        metadata:
+          annotations:
+            kubectl.kubernetes.io/last-applied-configuration: |
+              {"apiVersion":"v1","data":{"game.properties":"enemy.types=aliens,monsters\nplayer.maximum-lives=5    \n","player_initial_lives":"3","ui_properties_file_name":"user-interface.properties","user-interface.properties":"color.good=purple\ncolor.bad=yellow\nallow.textmode=true    \n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"game-demo","namespace":"default"}}
+          creationTimestamp: "2024-09-06T13:23:20Z"
+          name: game-demo
+          namespace: default
+          resourceVersion: "6146"
+          uid: 6b2ff223-b0f3-4b13-b97f-590bcc564173
+
+- Inject Config Map Keys into a Definitions file
+
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: configmap-demo-pod
+      spec:
+        containers:
+          - name: demo
+            image: alpine
+            command: ["sleep", "3600"]
+            env:
+              # Define the environment variable
+              - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
+                                          # from the key name in the ConfigMap.
+                valueFrom:
+                  configMapKeyRef:
+                    name: game-demo           # The ConfigMap this value comes from.
+                    key: player_initial_lives # The key to fetch.
+              - name: UI_PROPERTIES_FILE_NAME
+                valueFrom:
+                  configMapKeyRef:
+                    name: game-demo
+                    key: ui_properties_file_name
+            volumeMounts:
+            - name: config
+              mountPath: "/config"
+              readOnly: true
+        volumes:
+        # You set volumes at the Pod level, then mount them into containers inside that Pod
+        - name: config
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: game-demo
+            # An array of keys from the ConfigMap to create as files
+            items:
+            - key: "game.properties"
+              path: "game.properties"
+            - key: "user-interface.properties"
+              path: "user-interface.properties"
+
+The above section of the code is the usual, let's break down the env section and the volume section.
+
+- The **env** section has two variables, namely; PLAYER_INITIAL_LIVES and UI_PROPERTIES_FILE_NAME. The *valueFrom* for PLAYER_INITIAL_LIVES variable will fetch a key from a config map named *game-demo* which will be fed from a value found in *ui_properties_file_name*, that in turn will be the content to PLAYER_INITIAL_LIVES variable. Similarly, UI_PROPERTIES_FILE_NAME variable's *valueFrom* will fetch a key from a config map named *game-demo* which will get its value from *ui_properties_file_name* that will in turn be the content of UI_PROPERTIES_FILE_NAME variable.
+- *volumeMounts*, config maps can be also mounted as volumes, it's name is *config*, it will be mounted in the container at */config* path which will be holding all the content that will be created. 
+- The *volumes* section is where the content to be mounted in *volumeMounts* will come from, the volume name will be *config* and it will be fetched from the config map as a volume type named *game-demo* and the items inside it are two keys; *game.properties* and *user-interface.properties.* The contents of *game.properties* will be stored into a filed named *game.properties* as indicated by the path, likewise with *user-interface.properties* contents will be stored into file named *user-interface.properties* as as well indicated by the path. The paths/filenames can be different as well if one wishes. These two files will be created in a */config* directory.
+- Basically you'll have a container which will have a  config map and you create volume mapping to a directory that'll saves the two configuration files.
+  
+  1. Create a [config map](samplecm.yaml)
+   
+         kubectl  apply -f samplecm.yaml
+
+  2. Create a vim [readcm.yaml](readcmpod.yaml) file
+  
+         $ vim readcm.yaml
+  
+  3. Create a Pod
+  
+         $ kubectl apply -f readcm.yaml 
+
+     Output
+
+          pod/configmap-demo-pod created
+  4. List pods
+  
+          $ kubectl get pod
+
+      Output
+
+          NAME                 READY   STATUS    RESTARTS   AGE
+          configmap-demo-pod   1/1     Running   0          8s
+  
+  5. Log into the container
+  
+          $ kubectl exec --stdin --tty configmap-demo-pod -- /bin/sh
+
+     Output
+
+          / #
+
+     Check the config files created
+
+          / # ls /config/
+          / # cd config/
+          /config # cat game.properties
+     Output 
+          
+          enemy.types=aliens,monsters
+          player.maximum-lives=5    
+     
+     Check the second file
+
+          /config # cat user-interface.properties 
+          color.good=purple
+          color.bad=yellow
+          allow.textmode=true
+          
+     Call the injected variables
+
+          /config # echo $PLAYER_INITIAL_LIVES
+          
+     Output
+          
+          3
+     
+     Call the second injected variable
+
+          /config # echo $UI_PROPERTIES_FILE_NAME
+          
+     Output
+     
+          user-interface.properties
+          
+## Secrets
 
 # References
 
