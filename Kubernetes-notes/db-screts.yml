@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  my_root_pass: TXktU3VwZXItY29tcGxleC1wYXNzd2Qh

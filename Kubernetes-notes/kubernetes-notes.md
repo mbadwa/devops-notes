@@ -2114,6 +2114,173 @@ The above section of the code is the usual, let's break down the env section and
           
 ## Secrets
 
+Secrets are encoded/encrypted variables to POD. It stores and manages sensitive information such as passwords or Docker registry credentials which get injected in the  Pod definition file, they are in clear text in your repository, this will be a huge security risk because whoever has access to the repo will see this sensitive information. The solution is to use the variables stored in Secrets that are encoded or encrypted. then they get to be injected into a definitions file of a Pod.
+
+### Create Secrets | Imperative 
+
+Here is how you create a secret imperatively that encodes (not encrypt) the value
+
+    $ kubectl create secret generic db-secret --from-literal=MYSQL_ROOT_PASSWORD=some-complex-password
+
+Output
+
+    secret/db-secret created
+
+View the created secret
+
+    $ kubectl get secret db-secret -o yaml
+
+Output (snippet)
+
+    apiVersion: v1
+    data:
+      MYSQL_ROOT_PASSWORD: ac29tZwNvbxBZhwYxNZd89yZ==
+    kind: Secret
+    metadata:
+
+How to create an encoded value of text
+
+    $ echo -n "My-Super-complex-passwd!" | base64
+
+Output 
+
+    TXktU3VwZXItY29tcGxleC1wYXNzd2Qh
+
+To decode the coded value
+
+ 
+    $ echo 'TXktU3VwZXItY29tcGxleC1wYXNzd2Qh' | base64 --decode
+
+Output
+
+    My-Super-complex-passwd!mbadwa@mbadwa-HP-ENVY
+
+### Create Secrets | Declaratively
+
+You create an encoded text first
+
+    $ echo -n "My-Super-complex-passwd!" | base64
+
+Output
+
+    TXktU3VwZXItY29tcGxleC1wYXNzd2Qh
+
+Create a secret definitions file
+
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysecret
+    type: Opaque
+    data:
+      my_root_pass: TXktU3VwZXItY29tcGxleC1wYXNzd2Qh
+
+### Pod Definitions file with secret
+
+Create a defs [file](/Kubernetes-notes/pod-secret-def.yml) and inject all secret keys
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: db-pod
+      labels:
+        app: db
+        project: infinity
+    spec:
+      containers:
+        - name: mysql-container
+          image: mysql:5.7
+          envFrom:
+            - secretRef:
+                name: db-secret
+
+### Pod Definitions file with secret
+
+Create a defs [file](/Kubernetes-notes/pod-secret-selective-keys.yml) and inject a particular key
+
+    spec:
+      containers:
+        - name: mysql-container
+          image: mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: my_root_pass
+
+### Demo
+
+Encode username
+
+    $ echo -n "admin" | base64
+
+Output
+
+    YWRtaW4=
+
+Encode password
+
+    $ echo -n "My-Super-Duper-Complex-Pass!!" | base64
+
+Output
+
+    TXktU3VwZXItRHVwZXItQ29tcGxleC1QYXNzZWNobyAtbiBhZG1pbiB8IGJhc2U2NA==
+
+Create the secret
+
+    $ kubectl create -f example-secret.yml
+
+Output
+
+    secret/supersecret created
+
+Create a pod defs [file](/Kubernetes-notes/readsecret.yaml)
+
+Create a Pod 
+
+    $ kubectl create -f readsecret.yaml
+
+Output
+    
+    pod/secret-env-pod created
+
+
+Check pod
+
+    $ kubectl get pod
+
+Output
+
+    NAME             READY   STATUS    RESTARTS   AGE
+    secret-env-pod   1/1     Running   0          26s
+
+Connect to the pod
+
+    $ kubectl exec --stdin --tty secret-env-pod -- /bin/bash
+
+Output
+
+    root@secret-env-pod:/data# 
+
+Lets get the variables
+
+    echo $SECRET_USERNAME
+
+Output
+
+    admin
+
+    echo $SECRET_PASSWORD
+
+Output
+
+    My-Super-Duper-Complex-Passecho -n admin | base64
+
+For more information, read secrets [here](https://kubernetes.io/docs/concepts/configuration/secret/). This will mainly be used to store Docker private registry secrets and passwords, etc.
+
+## Ingress
+
 # References
 
 1. [Kubernetes Documentation](https://kubernetes.io/docs/concepts/overview/)
