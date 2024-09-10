@@ -2281,6 +2281,171 @@ For more information, read secrets [here](https://kubernetes.io/docs/concepts/co
 
 ## Ingress
 
+Make your HTTP (or HTTPS) network service available using a protocol-aware configuration mechanism, that understands web concepts like URIs, hostnames, paths, and more. The Ingress concept lets you map traffic to different backends based on rules you define via the Kubernetes API.
+
+An API object that manages external access to the services in a cluster, typically HTTP.
+
+Ingress may provide load balancing, SSL termination and name-based virtual hosting.
+
+
+## Nginx Ingress Controller
+
+[Here](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md) is the installation guide for Nginx Ingress Controller for different service providers.
+
+For AWS click [here](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md#aws)
+
+## kubectl Cheat Sheet
+
+Here is the main [kubectl](https://kubernetes.io/docs/reference/kubectl/generated/kubectl/) documentation from Kubernetes itself, and here is a quick third party reference for [kubectl](https://encore.dev/resources/k8s-cheat-sheet) commands or [here](https://quickref.me/kubernetes.html). Here is the [kubectl ref](kubectlCheatSheet.md) from yours truly.
+
+To quickly generate a pod definition file
+
+    $ kubectl run nginxpod --image=nginx --dry-run=client -o yaml > nginxpod.yaml
+
+
+You can then clean it up and add other items accordingly
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      labels:
+        run: nginxpod
+      name: nginxpod
+    spec:
+      containers:
+      - image: nginx
+        name: nginxpod
+
+Similarly, you can also create a deployment file
+
+    $ kubectl create deployment nginxdep --image=nginx --dry-run=client -o yaml > nginxdeploy.yaml
+
+
+Cat the nginxdeploy.yaml
+
+    $ cat nginxdeploy.yaml
+
+Output of the [file](nginxdeploy.yaml)
+
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginxdep
+      name: nginxdep
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: nginxdep
+      strategy: {}
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: nginxdep
+        spec:
+          containers:
+          - image: nginx
+            name: nginx
+            resources: {}
+    status: {}
+
+## Extras
+
+- [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+
+  In simplistic terms, it's like painting node with some paint(pertinent information) as a classifier and toleration means a pod that can tolerate the paint inside it. Basically, a pod will be tainted with a *key1:value1:NoSchedule-* as an example, this means all all pods that will qualify to run the node with the details above, can only do so if it has *tolerations* in place. Otherwise a pod won't be accepted.
+
+- [Limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+
+  *Requests* is reserving the resources, if the node has that reserved it'll run, otherwise it'll be in pending state. *limits* is capping the resources, not to go beyond certain limit. 
+
+      ---
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: frontend
+      spec:
+        containers:
+        - name: app
+          image: images.my-company.example/app:v4
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+        - name: log-aggregator
+          image: images.my-company.example/log-aggregator:v6
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+- [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+
+  Jobs represent one-off tasks that run to completion and then stop. E.g. a script or a batch job.
+
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pi
+      spec:
+        template:
+          spec:
+            containers:
+            - name: pi
+              image: perl:5.34.0
+              command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+            restartPolicy: Never
+        backoffLimit: 4
+- [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+
+  Similar to Linux cronjob
+  
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: hello
+      spec:
+        schedule: "* * * * *"
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                - name: hello
+                  image: busybox:1.28
+                  imagePullPolicy: IfNotPresent
+                  command:
+                  - /bin/sh
+                  - -c
+                  - date; echo Hello from the Kubernetes cluster
+                restartPolicy: OnFailure
+
+- [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+
+  A DaemonSet is usually used for collecting logs most cases just like Prometheus.
+
+  A DaemonSet defines Pods that provide node-local facilities. These might be fundamental to the operation of your cluster, such as a networking helper tool, or be part of an add-on.
+
+  A DaemonSet ensures that all (or some) Nodes run a copy of a Pod. As nodes are added to the cluster, Pods are added to them. As nodes are removed from the cluster, those Pods are garbage collected. Deleting a DaemonSet will clean up the Pods it created.
+
+
+## Lens
+
+It's a graphical display tool for your k8s clusters, it pulls the metric information using a Prometheus extension. How to install and setup can be found [here](https://k8slens.dev/).
+
+  
+
+
+
+
 # References
 
 1. [Kubernetes Documentation](https://kubernetes.io/docs/concepts/overview/)
@@ -2289,3 +2454,4 @@ For more information, read secrets [here](https://kubernetes.io/docs/concepts/co
 4. [K8s Documentation Home Page](https://kubernetes.io/docs/home/)
 5. [Killercoda Kubernetes playground](https://killercoda.com/playgrounds/scenario/kubernetes)
 6. [Play with Kubernetes playground](https://labs.play-with-k8s.com/)
+7. [Nginx Ingress Controller](https://docs.nginx.com/nginx-ingress-controller/)

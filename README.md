@@ -8,4 +8,4 @@ This will be a home to all my notes and also cheat-sheets I deem relevant for my
 4. [Ansible Notes](./Ansible-notes/Ansible-automation.md)
 5. [AWS Notes](./Git-notes/git-notes.md)
 6. [Docker Notes](./Docker-notes/docker-notes.md)
-7. [Kubernetes Note](./Kubernetes-notes/kubernetes-notes.md)
+7. [Kubernetes Notes](./Kubernetes-notes/kubernetes-notes.md)
