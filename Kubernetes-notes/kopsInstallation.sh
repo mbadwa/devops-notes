@@ -1,4 +1,15 @@
 kops create cluster --name=mbadwa.com \
---state=kops-mbadwa-bucket --zones=us-east-1a,us-east-1b \
+--state=s3://kops-mbadwa-bucket --zones=us-east-1a,us-east-1b \
 --node-count=2 --node-size=t3.small --master-size=t3.medium --dns-zone=mbadwa.com \
 --node-volume-size=8 --master-volume-size=8
+
+
+kops create cluster --name=kops.mbadwa.com \
+--state=s3://kops-mbadwa-bucket --zones=us-east-1a,us-east-1b \
+--node-count=2 --node-size=t3.small --master-size=t3.medium --dns-zone=kops.mbadwa.com \
+--node-volume-size=8 --master-volume-size=8
+
+
+# Finally, configure your cluster with: 
+kops update cluster --name mbadwa.com --yes --admin \
+kops update cluster --name mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin

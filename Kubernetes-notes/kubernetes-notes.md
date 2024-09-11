@@ -409,7 +409,6 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
             --node-volume-size=8 --master-volume-size=8
 
             # Finally, configure your cluster with: 
-            kops update cluster --name kubevpro.mbadwa.com --yes --admin \
             kops update cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin
   
   13. Wait 25-30 min then validate the cluster
@@ -2290,9 +2289,149 @@ Ingress may provide load balancing, SSL termination and name-based virtual hosti
 
 ## Nginx Ingress Controller
 
-[Here](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md) is the installation guide for Nginx Ingress Controller for different service providers.
+Documentation from [Nginx](https://kubernetes.github.io/ingress-nginx/deploy/), optionally from [GitHub](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md) is the installation guide for Nginx Ingress Controller for different service providers.
 
-For AWS click [here](https://github.com/kubernetes/ingress-nginx/blob/main/docs/deploy/index.md#aws)
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/aws/deploy.yaml
+
+Check namespaces
+
+    $ kubectl get ns
+
+Output
+
+    NAME              STATUS   AGE
+    default           Active   24m
+    ingress-nginx     Active   81s
+    kube-node-lease   Active   24m
+    kube-public       Active   24m
+    kube-system       Active   24m
+
+Get namespace
+
+    $ kubectl get all -n ingress-nginx
+
+Output
+
+    NAME                                            READY   STATUS      RESTARTS   AGE
+    pod/ingress-nginx-admission-create-btm7n        0/1     Completed   0          3m35s
+    pod/ingress-nginx-admission-patch-5rpqh         0/1     Completed   1          3m35s
+    pod/ingress-nginx-controller-7557f5d467-lstdt   1/1     Running     0          3m35s
+
+    NAME                                         TYPE           CLUSTER-IP       EXTERNAL-IP                                                                     PORT(S)                      AGE
+    service/ingress-nginx-controller             LoadBalancer   100.67.219.127   a1dada3cd736943a5944d2029fffdb9c-90bb3c712d9dc1c0.elb.us-east-1.amazonaws.com   80:32227/TCP,443:31380/TCP   3m35s
+    service/ingress-nginx-controller-admission   ClusterIP      100.67.169.190   <none>                                                                          443/TCP                      3m35s
+
+    NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+    deployment.apps/ingress-nginx-controller   1/1     1            1           3m35s
+
+    NAME                                                  DESIRED   CURRENT   READY   AGE
+    replicaset.apps/ingress-nginx-controller-7557f5d467   1         1         1       3m35s
+
+    NAME                                       COMPLETIONS   DURATION   AGE
+    job.batch/ingress-nginx-admission-create   1/1           6s         3m35s
+    job.batch/ingress-nginx-admission-patch    1/1           8s         3m35s
+
+
+  NOTE: Users will hit the loadbalancer and the traffic will be sent to the ingress-nginx controller pod to be checked again the rules that are setup to either deny or allow traffic to the destination pod(s).
+
+  ### Steps
+  
+  1. Create deployment defs [file](vprodep.yaml)
+   
+          $ vim vprodep.yaml 
+          $ kubectl apply -f vprodep.yaml
+  
+  2. Create service defs [file](vprosvc.yaml)
+
+          $ vim vprosvc.yaml
+          $ kubectl apply -f vprosvc.yaml
+          $ kubectl get svc
+          $ kubectl describe svc my-app
+  
+  3. Create ingress defs [file]()
+  
+          $ vim vproingress.yaml
+          $ kubectl apply -f vproingress.yaml
+
+  4. Create a DNS CNAME Record in GoDaddy
+    
+       1. Copy the LB DNS name in AWS
+    
+              a1dada3cd736943a5944d2029fffdb9c-90bb3c712d9dc1c0.elb.us-east-1.amazonaws.com
+       
+       2. Go to DNS records > Actions > Manage DNS Templates > Add
+            - Name of Template
+            - AWS CNAME Record
+            - Records > Add Registration
+              - Type    *Name*          Value*          TTL
+                CNAME    vprofile       LB DNS URL      1 hr
+
+1. Bind everything together
+
+       $ kubectl get svc
+
+   Output
+
+       NAME         TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
+       kubernetes   ClusterIP   100.64.0.1    <none>        443/TCP    92m
+       my-app       ClusterIP   100.69.8.53   <none>        8080/TCP   11s
+
+  Describe the svc
+
+       $ kubectl describe svc my-app
+
+  Output
+
+       Name:                     my-app
+       Namespace:                default
+       Labels:                   <none>
+       Annotations:              <none>
+       Selector:                 run=my-app
+       Type:                     ClusterIP
+       IP Family Policy:         SingleStack
+       IP Families:              IPv4
+       IP:                       100.69.8.53
+       IPs:                      100.69.8.53
+       Port:                     <unset>  8080/TCP
+       TargetPort:               8080/TCP
+       Endpoints:                100.96.1.98:8080
+       Session Affinity:         None
+       Internal Traffic Policy:  Cluster
+       Events:                   <none>
+
+  NOTE: Every time you are creating an ingress controller, you should keep in mind that you are creating an ingress rule for the service in question not a pod.
+
+  Create an Ingress
+
+      $ kubectl apply -f vproingress.yaml
+  
+  Output
+      
+      ingress.networking.k8s.io/vpro-ingress created
+      
+  List ingress
+
+      $ kubectl get ingress 
+
+      or
+
+      $ kubectl get ingress --watch
+
+  Output
+
+      NAME           CLASS   HOSTS        ADDRESS                                                                         PORTS   AGE
+      vpro-ingress   nginx   mbadwa.com   a1dada3cd736943a5944d2029fffdb9c-90bb3c712d9dc1c0.elb.us-east-1.amazonaws.com   80      22s
+
+  Check in the browser
+
+      mbadwa.com/login
+
+  NOTE: This is an example of path based routing, you can also setup using host based routing
+
+Clean up
+
+      $ kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/aws/deploy.yaml
+
 
 ## kubectl Cheat Sheet
 
@@ -2436,14 +2575,9 @@ Output of the [file](nginxdeploy.yaml)
 
   A DaemonSet ensures that all (or some) Nodes run a copy of a Pod. As nodes are added to the cluster, Pods are added to them. As nodes are removed from the cluster, those Pods are garbage collected. Deleting a DaemonSet will clean up the Pods it created.
 
-
 ## Lens
 
 It's a graphical display tool for your k8s clusters, it pulls the metric information using a Prometheus extension. How to install and setup can be found [here](https://k8slens.dev/).
-
-  
-
-
 
 
 # References
@@ -2454,4 +2588,4 @@ It's a graphical display tool for your k8s clusters, it pulls the metric informa
 4. [K8s Documentation Home Page](https://kubernetes.io/docs/home/)
 5. [Killercoda Kubernetes playground](https://killercoda.com/playgrounds/scenario/kubernetes)
 6. [Play with Kubernetes playground](https://labs.play-with-k8s.com/)
-7. [Nginx Ingress Controller](https://docs.nginx.com/nginx-ingress-controller/)
+7. [Kubernetes Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/)
