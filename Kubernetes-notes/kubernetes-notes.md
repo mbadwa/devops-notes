@@ -353,9 +353,10 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
          - Hit Done
 
      
-     NOTE: Option to create a user using group permissions or directly attached permissions but they have to have "AdministratorAccess"   
-  4. Route 53 DNS Settings
+     NOTE: Option to create a user using group permissions or directly 
+     attached permissions but they have to have "AdministratorAccess"   
   
+  4. Route 53 DNS Settings
       - Go Route 53 > Dashboard > DNS management > Hosted zones
       - Create hosted zone
         - Domain name
@@ -363,6 +364,7 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
         - Type
           - Public hosted zone
         - Hit Create hosted zone
+  
   5. Copy NS Servers URLs in GoDaddy
        - Go to [GoDaddy](https://dcc.godaddy.com/) or your DNS registrar > Domains > DNS Name Servers 
        - Hit Change name servers > Add (Similar to those)
@@ -390,7 +392,7 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
   9. Install [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/). Follow the given instructions
   10. Install [kOps](https://github.com/kubernetes/kops/releases) >  [v1.26.4](https://github.com/kubernetes/kops/releases/tag/v1.26.4) > Scroll to Assets > kops-linux-amd64
 
-      - Right click to copy the link 
+      - Copy the link 
   
             wget https://github.com/kubernetes/kops/releases/download/v1.26.4/kops-linux-amd64
             ls
@@ -428,6 +430,40 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
 
             kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
             sudo poweroff
+
+#### How to pause your kOps-managed Kubernetes cluster on AWS
+
+These are instructions on how to pause your kOps-managed Kubernetes cluster gracefully. After following these steps, if you re-spawn your cluster, all the existing k8s components will be retained.
+
+#### Pre-requisites
+
+These steps assumes that you have a kOps managed Kubernetes cluster running on AWS.
+
+**Steps**
+
+1. Run ```kops get ig``` to list the instance groups. You will see two instance groups — one for the control plane and one for your worker nodes.Eg: If you’ve been using kOps in the us-east-1a and us-east-1b availability zones, you will see ```control-plane-us-east-1a``` & ```nodes-us-east-1a```.
+   
+        $ kops get ig
+
+2. Run ```kops edit ig nodes-us-east-1a``` and change the ```minSize``` and ```maxSize``` values to 0.
+   
+        $ kops edit ig nodes-us-east-1a --state=s3://kops-mbadwa-bucket
+        $ kops edit ig nodes-us-east-1b --state=s3://kops-mbadwa-bucket
+
+3. Do the same for the control page group by running ```kops edit ig control-plane-us-east-1a```.
+
+        $ kops edit ig control-plane-us-east-1a --state=s3://kops-mbadwa-bucket
+
+4. To apply these changes to your cluster, run ```kops update cluster --name=${NAME} --yes```. Here NAME is a global variable referring to the name of your cluster.
+
+        $ kops update cluster --name=${NAME} --state=s3://kops-mbadwa-bucket --yes
+
+5. If you get a message “Changes may require instances to restart: kops rolling-update cluster”, just run ```kops rolling-update cluster```.
+
+        $ kops rolling-update cluster --state=s3://kops-mbadwa-bucket --yes
+
+    This will terminate all worker nodes & control plane nodes, but persist the cluster state in your S3 state store. If you re-spawn your cluster, all the existing pods will be retained. 
+
 
 ## Kubernetes Objects and Documentation
 
