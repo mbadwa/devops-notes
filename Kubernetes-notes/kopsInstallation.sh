@@ -13,5 +13,8 @@ kops create cluster --name=kops.mbadwa.com \
 # Finally, configure your cluster with: 
 kops update cluster --name mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin
 
+# Validate cluster after 10 - 20 min
+kops validate cluster --state=s3://kops-mbadwa-bucket
+  
 # kOps Cluster Clean Uninstallation
 kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
