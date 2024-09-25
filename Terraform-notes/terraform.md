@@ -37,7 +37,7 @@
 - Terraform file to launch instance
 - Run ```terraform apply```
 
-**Exercise One**
+**Exercise One - Deploying an EC2 instance to AWS**
 
 - Write ```instance.tf``` file
 - Launch instance
@@ -114,7 +114,7 @@ If the state is different from the current one, only then will it apply the chan
         $ mkdir exercise1 && cd exercise1
         $ vim first-instance.tf
 
-9. Paste the code of the ``first-instance.tf`` [file](first-instance.tf) and save it
+9. Paste the code of the ``first-instance.tf`` [file](./exercise-01/first-instance.tf) and save it
 10. Run ``terraform init`` command to check AWS provider, download AWS plugins into the current working directory
 
     Run ``ls -la`` to confirm
@@ -212,6 +212,7 @@ If the state is different from the current one, only then will it apply the chan
     Apply
 
         $ terraform apply
+Destroy complete! Resources: 1 destroyed.
 
     Check the EC2 in the console, it should be running
 
@@ -257,8 +258,7 @@ If the state is different from the current one, only then will it apply the chan
         .
         .
         .
-        Plan: 0 to add, 1 to change, 0 to destroy.
-
+        Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
 16. Terraform compares current state with remote state, if there are changes locally then it'll apply the changes to the remote resource. Here is how it does it.
 
@@ -268,7 +268,19 @@ If the state is different from the current one, only then will it apply the chan
 
     The output displays all attributes of the created resource
 
-        mmmmm
+        {
+         "version": 4,
+         "terraform_version": "1.9.6",
+         "serial": 1,
+         "lineage": "90a341fe-3a25-688f-c59c-af0a10a51a67",
+         "outputs": {},
+            .
+            .
+            .
+            .
+          "check_results": null
+        }
+
 
 17. Terraform destroy reads the current state and ask for confirmation
 
@@ -282,5 +294,186 @@ If the state is different from the current one, only then will it apply the chan
         .
         .
         .
+        Destroy complete! Resources: 1 destroyed.
+
+**Exercise two - Terraform Variables**
+
+This focuses on how to define variables and how to consume them. Variables will help with;
+
+- Move secrets to another file
+- Values that changes based on environment, you can change them using variables. For example AMI, tags, keypair etc.
+- Reuse your code for example in dev, test and prod environments or reusing it in other projects
+
+Providers section has value region in ``instance.tf`` in exercise one, it's called ``first-instance.tf`` of course. That will be moved to ``vars.tf`` in the provider will be called as a variable
+
+    provider "aws" {
+        region = va.REGION
+    }
+
+The variables file ``vars.tf`` will look like so
+
+    variable AWS_REGION {
+        default = "us-west-1"
+    }
+
+The keys variables will be in ``terraform.tfvars``
+
+    AWS_ACCESS_KEY = ""
+    AWS_SECRET_KEY = ""
+
+Not recommended practice for security reasons
+
+The ``instance.tf`` file will look 
+
+    resource "aws_instance" "intro" {
+        ami = "ami-0ebfd941bbafe70c6"
+        instance_type = "t2.micro"
+    }
+
+The ``vars.tf`` will include the variable keys and AMIs 
+
+    variable AWS_ACCESS_KEY {}
+    variable AWS_SECRET_KEY {}
+    variable REGION {
+        default = "us-east-1"
+    }
+
+    variable AMIS [
+        type = "map"
+        default {
+            us-east-1 = "ami-0ebfd941bbafe70c6"
+            us-east-2 = "ami-037774efca2da0726"
+        }
+    ]
+
+The ``instance.tf`` will include region variables
+
+    resource "aws_instance" "intro" {
+        ami = var.AMIS[var.REGION]
+        instance_type = "t2.micro"
+    }
+
+**Tasks**
+
+- Write a ``providers.tf`` file
+- Write a ``vars.tf`` file
+- Write an ``instance.tf`` file
+- Validate then Apply Changes
+- Make some changes to ``instance.tf`` file
+- Revalidate and Reapply the changes
+
+**Steps**
+
+1. Create a ``providers.tf`` [file](./exercise-02/providers.tf)
+2. Create a ``vars.tf`` [file](./exercise-02/vars.tf)
+3. Create an ``instance.tf`` [file](./exercise-02/instance.tf)
+4. Run ``terraform init`` to initialize Terraform
+
+   output
+
+        Initializing the backend...
+        .
+        .
+        .
+        .
+        Terraform has been successfully initialized!
+
+5. Run ``terraform validate`` to validate the config files
+
+   Output
+
+        Success! The configuration is valid.
+6. Run ``terraform fmt`` to format the files
+
+   Output
+
+        instance.tf
+        vars.tf
+
+7. Print ``instance.tf`` file to the terminal 
+
+        cat instance.tf
+
+   Output
+
+        resource "aws_instance" "dove-instance" {
+            ami                    = var.AMIS[var.REGION]
+            instance_type          = var.INSTANCE_TYPE
+            availability_zone      = var.ZONE1
+            key_name               = "dove-key"
+            vpc_security_group_ids = ["sg-05240e7b1f709ac75"]
+            tags = {
+                Name    = "Dove-instance"
+                Project = "Dove"
+            }
+        }
+
+8. Print ``vars.tf`` file to the terminal 
+
+
+        cat vars.tf
+
+   Output
+
+        variable "REGION" {
+        default = "us-east-1"
+        }
+
+        variable "ZONE1" {
+        default = "us-east-1a"
+        }
+
+        variable "AMIS" {
+        description = "ID of AMIs to use for the instance"
+        type        = map(any)
+        default = {
+            us-east-1 = "ami-0ebfd941bbafe70c6"
+            us-east-2 = "ami-037774efca2da0726"
+        }
+        }
+
+        variable "INSTANCE_TYPE" {
+        description = "The type of instance to start"
+        type        = string
+        default     = "t2.micro"
+        }
+9. Dry run
+
+        terraform plan
+   
+   Output
+
+        Terraform used the selected providers to generate the following execution plan.
+        .
+        .
+        .
+        .
         Plan: 1 to add, 0 to change, 0 to destroy.
 
+10. Apply 
+
+        terraform apply
+
+    Output
+
+        
+        Terraform used the selected providers to generate the following execution plan.
+        .
+        .
+        .
+        .
+        Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+11. Clean up
+
+        terraform destroy
+
+    Output
+
+        aws_instance.dove-instance: Refreshing state... [id=i-04a514198333e7eda]
+        .
+        .
+        .
+        .
+        Destroy complete! Resources: 1 destroyed.
+
+## Terraform Provisioning
