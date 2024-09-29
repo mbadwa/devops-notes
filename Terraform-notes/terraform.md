@@ -607,7 +607,6 @@ You need a few things, e.g.
         $ ssh-keygen
         $ Enter file in which to save the key (/root/.ssh/id_rsa): dovekey
         $ ls
-        $ sudo chmod "400" dovekey
 
     NOTE: You should have a public key and a private key in the current folder ``exercise-03``
 2. Create a script named ``web.sh`` and paste the [code](./exercise-03/web.sh)
@@ -636,20 +635,24 @@ You need a few things, e.g.
 
 6. Initialize Terraform
 
-        $ sudo terraform init
+        $ terraform init
 
 7. Terraform validate for syntax 
    
-        $ sudo terraform validate
+        $ terraform validate
 
 8. Terraform format
 
-        $ sudo terraform fmt
+        $ terraform fmt
 
 9.  Terraform plan
 
-        $ sudo terraform plan
+        $ terraform plan
 
 10. Terraform apply
    
-        $ sudo terraform apply
+        $ terraform apply
+
+11. Destroy the resources
+
+        $ terraform destroy
