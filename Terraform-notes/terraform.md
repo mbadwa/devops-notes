@@ -104,6 +104,8 @@ If the state is different from the current one, only then will it apply the chan
    - Inbound rules > Add rule
    - Type: ```SSH``` Protocol: ```TCP``` Port range: ```22```
    - Source type: ```myIP``` Source: ```Your-IP-here``` Description - optional: ```EC2 Terraform SSH access```
+   - Type: ``HTTP`` Protocol: ``TCP`` Port range: ``80``
+   - Source type: ``Anywhere-IPv4`` Source: ``0.0.0.0/0`` Description - optional: ``Web Access From Anywhere``
    - Hit Create security group
    - Copy ```Security group ID``` and paste it under ``vpc_security_group_ids`` in ``resource`` section of ``first-instance.tf`` file
 
@@ -477,3 +479,177 @@ The ``instance.tf`` will include region variables
         Destroy complete! Resources: 1 destroyed.
 
 ## Terraform Provisioning
+
+**Provisioning use cases**
+
+1. You use provisioning to build custom images with tools like **Packer**
+2. Use standard image and use provisioner to setup softwares and files.
+   - Upload files or artifacts
+   - ``remote_exec``
+     - Ansible, Puppet or Chef
+
+**Provisioner Connection**
+
+SSH for Linux
+
+    provisioner "file" {
+        source = "files/test.conf"
+        destination = "/etc/test.conf"
+
+        connection {
+            type = "ssh"
+            user = "root"
+            password = var.root_password
+        }
+    }
+
+WinRM for Windows
+
+
+    provisioner "file" {
+        source = "conf/myapp.conf"
+        destination = "C:/App/myapp.conf"
+
+        connection {
+            type = "winrm"
+            user = "Administrator"
+            password = var.admin_password
+        }
+    }
+
+**More Provisioners**
+
+- The **file** provisioner is used to copy files or directories
+- **remote-exec** invokes a command/script on remote resource
+- **local-exec** provisioner invokes a local executable after a resource is created
+- The **puppet** provisioner installs, configures and runs the Puppet agent on a remote resource
+  - Supports both **ssh** and **winrm** type connections
+
+- Ansible: run terraform, Output IP address, run playbook with **local-exec**
+
+You need a few things, e.g. 
+
+**Variables**
+
+    variable "PRIV_KEY_PATH" {
+        default = "infi-inst_key"
+    }
+
+    variable "PUB_KEY_PATH" {
+        default = "infi-inst_key.pub"
+    }
+
+    variable "USER" {
+        default = "ubuntu"
+    }
+
+**Key Pair & Instance Resources**
+
+
+    resource "aws_key_pair" "dove-key" {
+        key-name = "dovekey"
+        public_key = file("dovekey.pub")
+    }
+
+
+    resource "aws_instance" "intro" {
+        ami = var.AMIS[var.REGION]
+        instance_type = "t2.micro"
+        availability_zone = var.ZONE1
+        key_name = aws_key_pair.dove-key.key_name
+        vpc_security_group_ids = ["sg-833e24fd"]
+    }
+
+**File Provisioner**
+
+    provisioner "file" {
+        source = "web.sh"
+        destination = "/tmp/web.sh"
+    }
+
+        connection {
+            user = var.USER
+            private_key = file(var.PRIV_KEY_PATH)
+            host = self.public_ip
+        }
+
+**Remote-exec Provisioner**
+
+    provisioner "remote-exec" {
+        inline = [
+            "chmod u+x" /tmp/web.sh
+            "sudo /tmp/web.sh"
+        ]
+    }
+
+**Exercise three - push a script with Terraform**
+
+**Tasks**
+
+- Generate key pair
+- Create script
+- Create ``providers.tf``
+- Create ``vars.tf``
+- Create ``instance.tf``
+  - key pair resource
+  - aws_instance resource
+    - provisioners 
+      - file
+      - remote-exec
+- Apply changes
+  
+**Steps**
+
+1. Create an SSH key in exercise-03 directory
+
+        $ cd ~/Documents/terraform-scripts
+        $ mkdir exercise-03 && cd exercise-03
+        $ ssh-keygen
+        $ Enter file in which to save the key (/root/.ssh/id_rsa): dovekey
+        $ ls
+        $ sudo chmod "400" dovekey
+
+    NOTE: You should have a public key and a private key in the current folder ``exercise-03``
+2. Create a script named ``web.sh`` and paste the [code](./exercise-03/web.sh)
+
+        $ sudo vim web.sh
+        $ esc
+        $ :wq!
+
+3. Create a provider file named ``providers.tf`` and paste the [code](./exercise-03/provider.tf)
+
+        $ sudo vim providers.tf
+        $ esc
+        $ :wq!
+
+4. Create a file named ``vars.tf`` and paste the [code](./exercise-03/vars.tf)
+
+        $ sudo vim vars.tf
+        $ esc
+        $ :wq!
+
+5. Create a file named ``instance.tf`` and paste the [code](./exercise-03/instance.tf)
+   
+        $ $ sudo vim vars.tf
+        $ esc
+        $ :wq!
+
+6. Initialize Terraform
+
+        $ sudo terraform init
+
+7. Terraform validate for syntax 
+   
+        $ sudo terraform validate
+
+8. Terraform format
+
+        $ sudo terraform fmt
+
+9.  Terraform plan
+
+        $ sudo terraform plan
+
+10. Terraform apply
+   
+        $ sudo terraform apply
