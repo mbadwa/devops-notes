@@ -656,3 +656,190 @@ You need a few things, e.g.
 11. Destroy the resources
 
         $ terraform destroy
+
+**Exercise Four - Output**
+
+- When we run ``terraform apply`` it retains a lot of output that gets stored in ``terraform.tfstate`` file. Information from it can be accessed directly, for example you can fetch info of an instance, ``aws_instance`` and get the **attribute** ``public_ip`` from it.
+- The `` output`` block can be used to print the attributes
+- The ``local-exec`` to save info such as IDs, IP addresses etc, into a text file
+
+**Output Attributes**
+
+    output "instance_ip_addr" {
+        value = aws_instance.server.public_ip
+    }
+
+Elements => resourceType.resourceName.attributeName
+
+    resourceType => aws_instance
+    resourceName => Server
+    attributeName => public_ip
+
+**Store Output in a File**
+
+    resource "aws_instance" "out_inst" {
+        ami = ver.AMIS[var.REGION]
+        instance_type = "t2.micro"
+        key_name = aws_key_pair.dino-key.key_name
+    
+
+        provisioner "local-exec" {
+            command = "echo aws_instance.out_inst.private_ip >> private_ips.txt"
+        }
+
+    }
+
+**Print IPs as an Output**
+
+To print output in the terminal after running the ``terraform apply`` command and use the information to access the server
+
+**Steps**
+
+- Copy the ``exercise-03`` folder and name it ``exercise-04`` folder
+
+        $ cp -r exercise-03 exercise-04
+
+- Update the ``instance.tf`` [code](./exercise-04/instance.tf) and add the output lines at the bottom
+
+        $ sudo vim instance.tf
+  
+  Append these lines to it
+
+        output "PublicIP" {
+            value = aws_instance.dove-inst.public_ip
+        }
+
+        output "PrivateIP" {
+            value = aws_instance.dove-inst.private_ip
+        }
+
+- Terraform Initialize
+
+        $ terraform init
+
+- Terraform Validate
+
+        $ terraform validate
+
+- Terraform format
+        
+        $ terraform fmt
+
+- Terraform Plan
+
+        $ terraform plan
+
+    NOTE: In the output of ``terraform plan`` you can also list a number of attributes that Terraform will create for the resource
+
+- Terraform Apply
+
+        $ terraform apply
+
+- Terraform Destroy
+        
+        $ terraform destroy
+
+**Exercise Five - Backend**
+
+The ``terraform.tfstate`` file keeps the current state locally in your machine, if the infrastructure is being maintained by a team, each will have a different file of ``terraform.tfstate`` representing their own changes to the infrastructure that will be different for everyone. To solve the this challenge, Terraform uses backend to sync all the states of each team member so that all local ``terraform.tfstate`` files are in sync to have the the same exact content.
+
+**Steps**
+
+- Copy the ``exercise-04`` folder and name it ``exercise-05`` folder
+
+        $ cp -r exercise-04 exercise-05
+
+- Create an S3 bucket [file](./exercise-05/backend.tf) and paste the content
+
+        $ sudo vim backend.tf
+
+- Create a folder inside the S3 bucket named `terraform`
+
+- Execute Terraform
+
+    Terraform Init
+
+        $ terraform init
+
+    Validation
+
+        $ terraform validate
+
+    Format
+
+        $ terraform fmt
+
+    Terraform Application
+
+        $ terraform apply
+
+    Deletion
+
+        $ terraform destroy 
+
+**Exercise Six - Multi Resource**
+
+Terraform is used by different providers, e.g. DigitalOcean, Oracle, Alibaba etc. The featured providers are these [ones](https://registry.terraform.io/)
+
+Let's go to ``aws_instance`` resource in the [documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+
+1. Create `exercise-06` directory and create a [file](./exercise-06/providers.tf) named `providers.tf` 
+   
+        $ mkdir exercise-06 && cd exercise-06
+        $ vim providers.tf
+2. Create a `vars.tf` [file](./exercise-06/vars.tf)
+   
+        $ vim vars.tf
+
+3. Copy the ssh keys into the folder
+
+        $ cp ~/Documents/terraform-scripts/exercise-05/terrakey .
+        $ cp ~/Documents/terraform-scripts/exercise-05/terrakey.pub .
+4. Create a VPC resource [file](./exercise-06/vpc.tf) named `vpc.tf`
+
+        $ vim vpc.tf
+
+5. Create a `backend.tf` file and paste [code](./exercise-06/backend.tf)
+
+        $ vim backend.tf
+
+6. Create `instance.tf` file and paste [code](./exercise-06/instance.tf)
+
+        $ vim instance.tf
+
+7. Create `secgrp.tf` file and paste [code](./exercise-06/secgrp.tf)
+
+        $ vim secgrp.tf
+8. Create a `web.sh` file and paste [code](./exercise-06/web.sh)
+
+        $ vim web.sh
+
+9.  Execute Terraform
+
+    Terraform Init
+
+        $ terraform init
+
+    Validation
+
+        $ terraform validate
+
+    Format
+
+        $ terraform fmt
+
+    Terraform Application
+
+        $ terraform apply
+
+    Deletion
+
+        $ terraform destroy
+
+## AWS Elastic Kubernetes Service (EKS) Provisioning
+
+# References
+
+1. [Terraform Featured Providers](https://registry.terraform.io/)
+2. [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest)
+3. [AWS Provider Code Snippet Guides](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
