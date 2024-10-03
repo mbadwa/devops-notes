@@ -478,7 +478,7 @@ The ``instance.tf`` will include region variables
         .
         Destroy complete! Resources: 1 destroyed.
 
-## Terraform Provisioning
+## Terraform Manual Managed Provisioning in AWS
 
 **Provisioning use cases**
 
@@ -836,10 +836,56 @@ Let's go to ``aws_instance`` resource in the [documentation](https://registry.te
 
         $ terraform destroy
 
-## AWS Elastic Kubernetes Service (EKS) Provisioning
+## AWS Elastic Kubernetes Service (EKS) Provisioning with Terraform
 
+To avoid a complex task of managing Kubernetes yourself, you can opt for EKS that is managed by AWS itself. The advantages are you'll no longer be involved with the system admin work, in this case, you just pass simple info regarding the K8s cluster to be created such as node groups, and management will be taken care of. You can change capacity in a whim, scaling out or in a snap of fingers.
+
+We will use [Terraform Modules](https://registry.terraform.io/browse/modules?product_intent=terraform) to create the AWS EKS cluster
+
+**Steps**
+
+1. Clone the GitHub repo code [here](https://github.com/hkhcoder/vprofile-project.git) and switch to EKS branch
+2. Create a bucket and update the Terraform dependencies in the cloned repo's file named `terraform.tf`
+3. Open the cloned folder `vprofile-project`, go through each file to familiarize yourself with the cluster you are going to create
+4. Install and deploy EKS Terraform Cluster
+   1. Initialize
+    
+            $ terraform init
+   2. Validate
+
+            $ terraform validate
+   3. Format
+
+            $ terraform fmt
+   4. Plan
+   
+            $ terraform plan
+
+   5. Apply
+
+            $ terraform apply
+   
+5. Connect to the cluster using a `kubeconfig` file
+
+   1. Create a kubeconfig file command to manage your 
+
+            $  aws eks update-kubeconfig --region us-east-1 --name your-cluster-name
+   2. View the kubeconfig file create
+   
+            $ cat /home/mbadwa/.kubconfig
+
+   3. Run kubectl commands as usual
+
+            $ kubectl get nodes
+            $ kubectl get pods
+
+6. Destroy the cluster
+
+            $ terraform destroy
 # References
 
 1. [Terraform Featured Providers](https://registry.terraform.io/)
 2. [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest)
 3. [AWS Provider Code Snippet Guides](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+4. [Terraform Modules](https://registry.terraform.io/browse/modules?product_intent=terraform)
+5. [AWS EKS Guide](https://docs.aws.amazon.com/eks/latest/userguide/network-reqs.html)
