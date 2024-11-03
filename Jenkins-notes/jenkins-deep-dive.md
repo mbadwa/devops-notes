@@ -375,7 +375,7 @@ Versioning solves the challenge for roll back, however the artifacts are still b
 This section will focus on deploying a CI pipeline using GitHub, Git, Jenkins, Maven, SonarQube and Nexus. This section will highlight the steps to build the CI pipeline, execution steps and resources setup, etc.
 
 Workflow Diagram of the CI
-![alt](Docker-CI%20Diagram.drawio.png)
+![alt](Docker-CI-Diagram.png)
 
 ### 1. Steps execution flow description of the CI diagram
 
