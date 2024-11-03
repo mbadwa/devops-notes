@@ -4219,19 +4219,19 @@
         <mxCell id="NuUtJJnA5RWQzXjUgvet-18" value="" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" vertex="1" parent="1">
           <mxGeometry x="1170" y="580" width="70" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="7v3dvBk3FeLe4XeNWvru-1" value="&lt;font color=&quot;#006eaf&quot;&gt;FETCH CODE&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;fillColor=none;textShadow=1;labelBorderColor=default;" vertex="1" parent="1">
+        <mxCell id="7v3dvBk3FeLe4XeNWvru-1" value="&lt;font style=&quot;font-size: 18px;&quot; color=&quot;#006eaf&quot;&gt;FETCH CODE&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;fillColor=none;textShadow=1;labelBorderColor=none;" vertex="1" parent="1">
           <mxGeometry x="297.3" y="689" width="125.37" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="7v3dvBk3FeLe4XeNWvru-3" value="&lt;font color=&quot;#006eaf&quot;&gt;BUILD&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=default;" vertex="1" parent="1">
+        <mxCell id="7v3dvBk3FeLe4XeNWvru-3" value="&lt;font style=&quot;font-size: 18px;&quot; color=&quot;#006eaf&quot;&gt;BUILD&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=none;" vertex="1" parent="1">
           <mxGeometry x="507.32000000000005" y="689" width="125.37" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="7v3dvBk3FeLe4XeNWvru-4" value="&lt;font color=&quot;#006eaf&quot;&gt;UNIT TEST&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=default;" vertex="1" parent="1">
+        <mxCell id="7v3dvBk3FeLe4XeNWvru-4" value="&lt;font style=&quot;font-size: 18px;&quot; color=&quot;#006eaf&quot;&gt;UNIT TEST&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=none;" vertex="1" parent="1">
           <mxGeometry x="717.3100000000001" y="689" width="125.37" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="7v3dvBk3FeLe4XeNWvru-5" value="&lt;font color=&quot;#006eaf&quot;&gt;CODE ANALYSIS&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=default;" vertex="1" parent="1">
+        <mxCell id="7v3dvBk3FeLe4XeNWvru-5" value="&lt;font style=&quot;font-size: 18px;&quot; color=&quot;#006eaf&quot;&gt;CODE ANALYSIS&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=none;" vertex="1" parent="1">
           <mxGeometry x="927.3100000000001" y="689" width="125.37" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="7v3dvBk3FeLe4XeNWvru-6" value="&lt;font color=&quot;#006eaf&quot;&gt;UPLOAD ARTIFACT&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=default;" vertex="1" parent="1">
+        <mxCell id="7v3dvBk3FeLe4XeNWvru-6" value="&lt;font style=&quot;font-size: 18px;&quot; color=&quot;#006eaf&quot;&gt;UPLOAD ARTIFACT&lt;/font&gt;" style="text;whiteSpace=wrap;html=1;align=center;shadow=1;textShadow=1;labelBorderColor=none;" vertex="1" parent="1">
           <mxGeometry x="1137.31" y="689" width="125.37" height="40" as="geometry" />
         </mxCell>
         <mxCell id="7v3dvBk3FeLe4XeNWvru-7" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#006EAF;strokeWidth=3;" edge="1" parent="1">
