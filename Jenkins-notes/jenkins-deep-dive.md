@@ -777,7 +777,7 @@ Now that a pipeline is built and the artifact is being shipped to Nexus for stor
 This section will focus on deploying the pipeline using AWS Amazon Container Registry service to store container images in AWS.After the artifact is built then it gets to be build into a container and be stored into Amazon ECR ready to be deployed. 
 
 Workflow diagram
-![alt](/General-notes/Jenkins-notes/Jenkins-CI.png)
+![alt](Docker-Docker-CI-ECR.png)
 
 **Steps**
 
