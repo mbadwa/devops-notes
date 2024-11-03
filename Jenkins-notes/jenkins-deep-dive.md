@@ -938,7 +938,7 @@ The pipeline will pickup where Elastic Container Registry left off, we will fetc
 
 Workflow diagram
 
-![CICD Diagram](/General-notes/Jenkins-notes/jenkin-cicd-pipeline.png)
+![CICD Diagram](Docker-Docker-CICD-ECS.png)
   
  **Plugins**
  -  Pipeline:aws steps
