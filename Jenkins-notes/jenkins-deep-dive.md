@@ -360,9 +360,9 @@ search for "Timestamp" plugin. Select "Zentimestamp" or any.
          - Add build step
            -  Execute shell > Command
 
-                  mkdir -p versions
-                  cp target/vprofile-v2.war versions/vprofile-V$BUILD_ID.war
-                  cp target/vprofile-v2.war versions/vprofile-V$BUILD_ID-$BUILD_TIMESTAMP.war
+                  $ mkdir -p versions
+                  $ cp target/vprofile-v2.war versions/vprofile-V$BUILD_ID.war
+                  $ cp target/vprofile-v2.war versions/vprofile-V$BUILD_ID-$BUILD_TIMESTAMP.war
            NOTE: The tagging is now with timestamp and build ID.
    5. Hit Save
    6. Hit Build Now 
@@ -410,7 +410,7 @@ Workflow Diagram of the CI
 
 **Steps**
 
-1. Go [here](/General-notes/Jenkins-notes/) to locate the installation scripts. You'll find all the scripts; for Sonarqube, Nexus and Jenkins. 
+1. Go [here](/Jenkins-notes/) to locate the installation scripts. You'll find all the scripts; for Sonarqube, Nexus and Jenkins. 
 2. Create a key pair
 
    A key pair is used for ssh authentication when you want to access your resources remotely.
@@ -457,26 +457,27 @@ Workflow Diagram of the CI
 
    2. SSH into the instance
   
-          ssh -i "NexusKey.pem" centos@your-instance-public-IP
+          $ ssh -i "NexusKey.pem" centos@your-instance-public-IP
   
       **Note**: If the default user doesn't work, you may want to use "centos" as a user.
 
    3. Create a script as a root user
   
-          vi nexus-setup.sh
+          $ vi nexus-setup.sh
       
-      Copy, paste and save the [nexus-setup.sh](/General-notes/Jenkins-notes/Nexus-setup/nexus-setup.sh) content. 
+      Copy, paste and save the [nexus-setup.sh](/Jenkins-notes/Nexus-setup/nexus-setup.sh) content. 
     
    4. Change permissions and run the script to install Nexus onto it.
   
-      chmod +x 'nexus-setup.sh' 
+          $ chmod +x 'nexus-setup.sh' 
+   
    5. Go to the browser
 
           http://nexus-server-public-IP:8081
 
    6. Copy the initial password path and run the command to reveal the password and update it accordingly. 
 
-          cat /opt/nexus/sonatype-work/nexus3/admin.password
+          $ cat /opt/nexus/sonatype-work/nexus3/admin.password
 
 **2. SonarQube Server Setup**
 
@@ -516,13 +517,17 @@ Workflow Diagram of the CI
 
 2. SSH into the instance
   
-       ssh -i "SonarKey" ubuntu@instance-public-IP
+       $ ssh -i "SonarKey" ubuntu@instance-public-IP
+
 3. Create a script as a root user
   
-       vi sonar-setup.sh
-   Copy, paste and save the [sonar-setup.sh](/General-notes/Jenkins-notes/Sonarqube-setup/sonar-setup.sh) content. 
+       $ vi sonar-setup.sh
+   
+   Copy, paste and save the [sonar-setup.sh](/Jenkins-notes/Sonarqube-setup/sonar-setup.sh) content. 
    
 4. Change script permissions and run the script
+   
+       $ chmod +x sonar-setup.sh
 
 5. To check the browser
 
@@ -548,30 +553,32 @@ Workflow Diagram of the CI
 
 1. Go to Dashboard > Manage Jenkins > Plugins > Available plugins
 
-2. Search for Nexus and select the "Nexus Artifact Uploader" option.
+2. Search for Nexus and select the `Nexus Artifact Uploader` option.
 
-    Search for Sonar and select the "SonarQube Scanner" option.
+    Search for `Sonar` and select the `SonarQube Scanner` option.
 
-    Search for Build Timestamp and select the "Build Timestamp" option.
+    Search for `Build Timestamp` and select the `Build Timestamp` option.
+
 3. Set timestamp value to version artifacts
+    
     - Go to Dashboard > Manage Jenkins > System > Pattern > Build 
       - Timezone
         - Your Org's
       - Timestamp
         - Pattern: "yy-MM-dd_HH-mm"
 
-4. Search for Pipeline Maven and select the "Pipeline Maven Integration" option.
+4. Search for Pipeline Maven and select the `Pipeline Maven Integration` option.
 
-   Search for Pipeline Utility and select the "Pipeline Utility Steps" option.
+   Search for `Pipeline Utility` and select the `Pipeline Utility Steps` option.
 
-5. Hit the Install button to continue
+5. Hit the `Install` button to continue
 
 ### 4. Write a pipeline script
 
 Jenkins uses pipeline code using Pipeline DSL which written in Groovy.
 There are two methods of writing this code, namely; Scripted method and Declarative method. Declarative method is the way to go.
 
-Here is the [code](/General-notes/Jenkins-notes/pipeline), make sure the versions under Tools are spelt exactly the same as in the Jenkins Tools specifications. Otherwise it will throw an error when running the pipeline declarative file. Also, you need to copy a specific URL of the [branch](https://github.com/hkhcoder/vprofile-project.git) being declared in the code from the Code green dropdown button.
+Here is the [code](/Jenkins-notes/Jenkinsfile), make sure the versions under Tools are spelt exactly the same as in the Jenkins Tools specifications. Otherwise it will throw an error when running the pipeline declarative file. Also, you need to copy a specific URL of the [branch](https://github.com/hkhcoder/vprofile-project.git) being declared in the code from the Code green dropdown button.
 
 **Steps**
 
@@ -581,9 +588,9 @@ First option is running the pipeline by pasting code into the box
    - Enter an item name
      - "sample-paac"
   
-2. Select the *pipeline* option
+2. Select the `pipeline` option
 3. Hit the OK button
-4. Next page scroll all the way down to *Pipeline > Definition* and make sure *Pipeline script* is selected and paste the [code](/General-notes/Jenkins-notes/pipeline) in the box.
+4. Next page scroll all the way down to *Pipeline > Definition* and make sure *Pipeline script* is selected and paste the [code](/Jenkins-notes/Jenkinsfile) in the box.
 5. Hit the Save button
 6. Hit the Build Now to run the pipeline.
 
@@ -615,16 +622,18 @@ To locate the artifact
 Go to Dashboard > sample-paac > your-build-# > Workspaces > click on the URL and open the /target folder to see the artifact.
 
 ### 5. Code Analysis on SonarQube
-Why code analysis? and what is it? Code analysis will check ones' code against the best practices and flag the problems that get fixed by developers. Code analysis scans for vulnerabilities in the code, it also looks for bugs/functional errors in the code. All in all in it does improve code quality of an app.
+
+Why code analysis? and what is it? Code analysis will check one's code against the best practices and flag the problems that get fixed by developers. Code analysis scans for vulnerabilities in the code, it also looks for bugs/functional errors in the code. All in all in it does improve code quality of an app.
 
 **Examples of Tools Used**
+
 1. Checkstyle
 2. Cobertura
 3. mstest
 4. owasp
 5. SonarQube Scanner, etc.
 
-In this project we will use SonarQube Scanner and Checkstyle. Before anything, we need to install SonarQube tool to integrate the SonarQube Server into Jenkins.
+In this project we will use SonarQube Scanner and Checkstyle. Before we start anything, we need to install SonarQube tool to integrate the SonarQube Server into Jenkins.
 
 **Steps**
 
@@ -689,6 +698,7 @@ In this project we will use SonarQube Scanner and Checkstyle. Before anything, w
     - Hit on Create
   
       Note: The URL should be similar to above, of course replacing with your instances private IP, otherwise it will be in pending state and the job will end up failing. Also, the security group should allow SonarQube traffic in Jenkins.
+
 ### 6. Nexus Code Artifact Upload
 
 Nexus is a storage location for software packages and retrieval, you can use Nexus as a package manager to also manage dependencies instead of letting the application update directory from the internet. You can have your own repos for softwares/packages to manage different dependencies.
@@ -728,7 +738,7 @@ Key Points
 
     Note: The hosted option is for storing repos, the proxy is for managing dependencies and the group is to support both options.
 
-3. Integrate with Jenkins, this is the last section of the [Jenkinsfile](/General-notes/Jenkins-notes/Jenkinsfile) section. Create a pipeline or run the previous one in Jenkins
+3. Integrate with Jenkins, this is the last section of the [Jenkinsfile](/Jenkins-notes/Jenkinsfile) section. Create a pipeline or run the previous one in Jenkins
    
 4. Testing
   
@@ -740,11 +750,13 @@ Key Points
     2. Go to Browse > vprofile-repo and you should see your artifact.
 
 ## Set automated notifications
+
 Now that a pipeline is built and the artifact is being shipped to Nexus for storage, it's time to create a notification stage to get notified about the results of each build run.
 
 **Steps**
 
 1. Create Slack Account and setup
+   
    1. Create a Slack Account or [log in](https://slack.com/signin#workspaces), if there is one already.
    2. Hit the Create a workspace button to continue, name it and hit Next and all the pertinent info.
    3. Create two channels namely; devopscicd and jenkinscicd or whatever makes sense.
@@ -782,6 +794,7 @@ Workflow diagram
 **Steps**
 
 Prerequisites
+
 1. Install AWS cli
 2. Install docker engine on Jenkins
     - Add jenkins user to docker group and reboot
@@ -794,11 +807,11 @@ Prerequisites
 
 To begin, SSH into the Jenkins server
 
-    ssh -i "jenkins-key.pem" ubuntu@jenkins-server-public-ip
+    $ ssh -i "jenkins-key.pem" ubuntu@jenkins-server-public-ip
 
 **1. Install AWS cli & check installation**
 
-    sudo apt update && sudo apt install awscli -y
+    $ sudo apt update && sudo apt install awscli -y
     aws --version
 
 **2. Installing Docker Engine**
@@ -809,35 +822,35 @@ Make sure to check latest [instructions](https://docs.docker.com/engine/install/
 
     # Add Docker's official GPG key:
 
-    sudo apt-get update
-    sudo apt-get install ca-certificates curl
-    sudo install -m 0755 -d /etc/apt/keyrings
-    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    sudo chmod a+r /etc/apt/keyrings/docker.asc
+    $ sudo apt-get update
+    $ sudo apt-get install ca-certificates curl
+    $ sudo install -m 0755 -d /etc/apt/keyrings
+    $ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    $ sudo chmod a+r /etc/apt/keyrings/docker.asc
 
     # Add the repository to Apt sources:
 
-    echo \
+    $ echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
+    $ sudo apt-get update
 
     # Add the repository to Apt sources:
 
-    echo \
+    $ echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
+    $ sudo apt-get update
 
   2. Install the Docker packages.
   
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    $ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   
   3. Verify that the Docker Engine installation is successful by running the hello-world image.
    
-    sudo docker run hello-world
+    $ sudo docker run hello-world
 
   This command downloads a test image and runs it in a container. When the container runs, it prints a confirmation message and exits.
 
@@ -845,10 +858,10 @@ Make sure to check latest [instructions](https://docs.docker.com/engine/install/
    
    Switch to root
 
-    sudo -i
-    usermod -a -G docker jenkins
-    id jenkins
-    reboot
+    $ sudo -i
+    # usermod -a -G docker jenkins
+    $ id jenkins
+    $ reboot
 
 **3. Create IAM user with ecr permissions**
 
@@ -913,7 +926,7 @@ Make sure to check latest [instructions](https://docs.docker.com/engine/install/
 
 **7. Run the pipeline**
 
-1. Go to the [code](/General-notes/Jenkins-notes/paac_ci_Docker_ECR.groovy) and update the "environment" code block.
+1. Go to the [code](/Jenkins-notes/paac_ci_Docker_ECR.groovy) and update the "environment" code block.
 
    - Update region, make sure to verify from the URL address on top under ECR, your appRegistry URL and the vprofileRegistry and append "https://" to it.
 
@@ -1025,6 +1038,7 @@ Workflow diagram
 
 
 3. Update the task role
+   
    - Go to Task definitions > vprofileapptask > vprofileapptask:1 > Task execution role, click on the link.
    - Go to Add permissions > Attach policies
      - Search for Cloudwatch
@@ -1071,13 +1085,14 @@ Workflow diagram
          - Click on the link
          - DNS name Info
            - Copy the URL and paste it in a new tab
+
 5. Run the pipeline
    
    Go to ECS > Clusters
    - Copy cluster name: "vprofile"
    Go to ECS > Clusters > vprofile > Services
    - Copy service name:  "vprofileappsvc"
-   Update the [code](/General-notes/Jenkins-notes/paac_ci_Docker_ECR.groovy) accordingly
+   Update the [code](/Jenkins-notes/paac_ci_Docker_ECR.groovy) accordingly
 
 6. Clean up
    1. Go to EC2 > Check SonarServer > Instance state > Terminate instance
@@ -1117,6 +1132,7 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
    This is simple, all you do is to select a job to run after another job is built. A completion of a previous job triggers the build run.
 
 ### Build Triggers Implementation Process  
+
 **Steps**
 
 1. Create a Git repository on GitHub
@@ -1127,32 +1143,37 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
 
 
 **1. Create a Git repository on GitHub**
-1. Log into your [GitHub](https://github.com) account
-2. Create a new repository and name it jenkins-triggers
-3. Keep it Private and hit Create repository
+
+  1. Log into your [GitHub](https://github.com) account
+  2. Create a new repository and name it jenkins-triggers
+  3. Keep it Private and hit Create repository
 
 **2. SSH Auth**
- 1. [Create](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/generate-ssh-key-pair.html) an SSH key on your computer
- 2. Copy the public key
-   
-        ls .ssh/ && cd .ssh/
-        cat id_rsa.pub
- 3. Go to your GitHub Settings not the repo Settings > SSH & GPG Keys
-   - Hit New ssh key button > Add new SSH Key > Title: "MyLaptop"
-   - Key type: Authentication key
-   - Key: Paste the Public Key content here.
-   - Hit the Add SSH Key and enter your password if prompted
 
- 4. Go to your the new repo in GitHub and copy the SSH link under Quick Setup not the HTTPS.
+  1. [Create](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/generate-ssh-key-pair.html) an SSH key on your computer
+  
+  1. Copy the public key
+   
+          $ ls .ssh/ && cd .ssh/
+          $ cat id_rsa.pub
+  
+  2. Go to your GitHub Settings not the repo Settings > SSH & GPG Keys
+      
+      - Hit New ssh key button > Add new SSH Key > Title: "MyLaptop"
+      - Key type: Authentication key
+      - Key: Paste the Public Key content here.
+      - Hit the Add SSH Key and enter your password if prompted
+
+  3. Go to your the new repo in GitHub and copy the SSH link under `Quick Setup` not the `HTTPS`.
 
 **3. Create a Jenkinsfile in Git repo and commit**
 
   1. Clone the repository
    
-          mkdir /whatever/path/and/name
-          cd into it
-          git clone git@github.com:your-repo-name/jenkins-triggers.git
-  2. Create a Jenkinsfile in the folder
+          $ mkdir /whatever/path/and/name && cd /whatever/path/and/name
+          $ git clone git@github.com:your-repo-name/jenkins-triggers.git
+  
+  2. Create a `Jenkinsfile` in the folder
     
     
           /* groovylint-disable-next-line CompileStatic */
@@ -1166,17 +1187,18 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
               /* groovylint-disable-next-line FileEndsWithoutNewline */
               }
           }
+  
   3. Commit the file
     
-          git add .
-          git commit -m "My first commit"
-          git push origin main
+          $ git add .
+          $ git commit -m "My first commit"
+          $ git push origin main
 
 **4. Setup Test triggers Initial Configs**
 
  1. Got to Manage Jenkins > Security > Security >  Git Host Key Verification Configuration
       - Accept first connection 
-      - Hit Save'Build'
+      - Hit Save `Build`
  2. Go to Dashboard > New item > Enter an item name:"Build" 
     - Select pipeline and hit Save
    
@@ -1198,7 +1220,7 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
   
       Fetch your private key from your machine and paste in the box
 
-          cat ~/.ssh/id_rsa
+          $ cat ~/.ssh/id_rsa
         
         
       - Hit the Add button
@@ -1208,6 +1230,7 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
       - Jenkinsfile (since it's in the root folder in GitHub)
 
      - Hit Save
+ 
  4. Build Now
 
 ### Varied Build Trigger Types Setup
@@ -1215,6 +1238,7 @@ Instead of initiating the build trigger manually like we have been doing sofar, 
 **1. Setting up Git Webhook Trigger**
 
 A job will get triggered based on events in GitHub repo
+  
   1. Copy the Jenkins URL, "http://your-jenkins-server-ip:8080"
   2. Go to your GitHub repo ie. jenkins-triggers Settings > Webhooks > Add webhook
    - Payload URL
@@ -1275,20 +1299,25 @@ A job will get triggered based on events in GitHub repo
 **Steps**
 
 1. Generate JOB URL
+    
     1. Job Configure => Build Triggers
     2. Check mark on “Trigger builds remotely”
     3. Give a token name
     4. Generate URL & save in a file
+
 2. Generate Token for User
+    
     1. Click your username drop down button (Top right corner of the page)
     2. configure => API Token => Generate
     3. Copy token name and save username:tokenname in a file
+
 3. Generate CRUMB
+    
     1. wget command is required for this, so download wget binary for git bash
     2. Extract content in c:/program files/Git/mingw64/bin
     3. Run below command in Git Bash, (replace username,password,Jenkins URL)
   
-            wget -q --auth-no-challenge --user username --password password --output-document - 'http://JENNKINS_IP:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+            $ wget -q --auth-no-challenge --user username --password password --output-document - 'http://JENNKINS_IP:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
     
     4. Save the token in a file
 
@@ -1304,15 +1333,17 @@ By now we should have below details
       3. Crumb
          E:g Jenkins-Crumb:8cb80f4f56d6d35c2121a1cf35b7b501
     
-    Fill all the above details in below URL and Execute
+Fill all the above details in below URL and Execute
     
-    curl -I -X POST http://username:APItoken @Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME -H "Jenkins-Crumb:CRUMB"
+    $ curl -I -X POST http://username:APItoken @Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME -H "Jenkins-Crumb:CRUMB"
     
-    e:g curl -I -X POST http://admin:110305ffb46e298491ae082236301bde8e@52.15.216.180:8080/job/vprofile-Code-Analysis/build?token=testtoken -H "Jenkins-Crumb:8cb80f4f56d6d35c2121a1cf35b7b501"
+e.g: curl -I -X POST http://admin:110305ffb46e298491ae082236301bde8e@52.15.216.180:8080/job/vprofile-Code-Analysis/build?token=testtoken -H "Jenkins-Crumb:8cb80f4f56d6d35c2121a1cf35b7b501"
+
 Note: The original document is [here](/General-notes/Jenkins-notes/Build+Triggers+Remotely.pdf).
 
 
 1. Go to Dashboard > Select your Job > Configure > Build Triggers
+   
    - Select, Trigger builds remotely (e.g., from scripts)
      - Authentication Token
        - name it "mybuildtoken", you can chose any name
@@ -1320,6 +1351,7 @@ Note: The original document is [here](/General-notes/Jenkins-notes/Build+Trigger
 
              JENKINS_URL/job/Build/build?token=TOKEN_NAME 
    - Hit Save
+
 2. Constructing the job URL
           
           #Job URL
@@ -1335,23 +1367,23 @@ Note: The original document is [here](/General-notes/Jenkins-notes/Build+Trigger
 
       Update user:"admin" and password: "your-Jenkins-password"
 
-        wget -q --auth-no-challenge --user admin --password admin123 --output-document - 'http://3.85.112.116:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+        $ wget -q --auth-no-challenge --user admin --password admin123 --output-document - 'http://3.85.112.116:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
     
   - Go to your terminal and paste the URL to create the CRUMB 
       
       It should look like this
 
-        Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da
+        $ Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da
 
 4. Curl Command construction
    
-        curl -I -X POST http://username:APItoken @Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME -H "Jenkins-Crumb:CRUMB"
+        $ curl -I -X POST http://username:APItoken @Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME -H "Jenkins-Crumb:CRUMB"
 
-   Substitution with our information, replace username:token with **"admin:113113a8ca6076f73fe8a86f4377eb733a"** and replace **Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME** with **"3.85.112.116:8080/job/Build/build?token=mybuildtoken"** amd finally the Jenkins-Crumb:CRUMB with **"Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da"**
+   Substitution with our information, replace username:token with **`"admin:113113a8ca6076f73fe8a86f4377eb733a"`** and replace **`Jenkins_IP:8080/job/JOB_NAME/build?token=TOKENNAME`** with **`"3.85.112.116:8080/job/Build/build?token=mybuildtoken"`** amd finally the Jenkins-Crumb:CRUMB with **`"Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da"`**
 
    Final result
       
-        curl -I -X POST http://admin:113113a8ca6076f73fe8a86f4377eb733a@3.85.112.116:8080/job/Build/build?token=mybuildtoken -H "Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da"
+        $ curl -I -X POST http://admin:113113a8ca6076f73fe8a86f4377eb733a@3.85.112.116:8080/job/Build/build?token=mybuildtoken -H "Jenkins-Crumb:992d9695fb06564e4ba74e1c990c5e3477c697b04638f7a8746c8ebae1ad67da"
 
   5. Go to Jenkins > Dashboard > "your-job-name"
 
@@ -1363,16 +1395,21 @@ Note: The original document is [here](/General-notes/Jenkins-notes/Build+Trigger
 The job run is dependent on the completion of another job. This one is pretty straight forward;
 
 1. Go to Dashboard > New item > name it, "test-job"
+     
      - Select Freestyle project option
      - Go to Build Steps > Execute shell and paste
   
             date
             echo 'Run after Build job is complete'
     - Hit Save and run the job to test it
+
 2. Open the test-job > Configure > Build Triggers > check the Build after other projects are built > Projects to watch
+   
    - Type in the name of the job it should run after
    - Hit Save
+
 3. Go to Dashboard > "Build" > Hit Build Now
+   
    - Click on the # and open Console Output at the very bottom you should see the result like so;
   
           Triggering a new build of test-job #2
@@ -1391,6 +1428,7 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
 4. If you would like to run your scripts, Python, Bash, Ansible etc, you can set up a node as a slave and do your testing.
 
 ### Prerequisites for Node Setup
+
 1. Any OS
 2. Network access from the Master
    
@@ -1405,6 +1443,7 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
 **Steps**
 
 1. Log into [AWS](https://aws.amazon.com/) and go to EC2 > Instances > Launch an instance
+   
    - Launch an instance 
      - Name and tags 
        - Name: "Slave-Jenkins"
@@ -1418,50 +1457,51 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
        - Allow SSH traffic from My IP
        - Allow SSH traffic from "Jenkins-SG"
    - Launch instance
+
 2. SSH into the node server and set it up for SSH
    
       1. Change permissions
 
-        chmod "400" slave-jenkins-key.pem
+        $ chmod "400" slave-jenkins-key.pem
 
       2. SSH into the vm
    
-        ssh -i "slave-jenkins-key.pem" ubuntu@your-vm-public-IP
-        sudo -i
+        $ ssh -i "slave-jenkins-key.pem" ubuntu@your-vm-public-IP
+        $ sudo -i
 
       3. Install the requirements
         
-        apt update && apt install openjdk-11-jdk -y
+        # apt update && apt install openjdk-11-jdk -y
 
       4. Create a user
         
-        adduser devops
-        passwd devops
+        # adduser devops
+        # passwd devops
 
       5. Create a directory
         
-        mkdir /opt/jenkins-silver-builds
+        # mkdir /opt/jenkins-silver-builds
 
       6. Change directory ownership
         
-        chown devops.devops /opt/jenkins-silver-builds -R
+        # chown devops.devops /opt/jenkins-silver-builds -R
 
       7. Switch to devops
         
-        su devops
+        # su devops
 
       8. Create .ssh folder in devops user
         
-        mkdir ~/.ssh; cd ~/.ssh/ && ssh-keygen -t rsa -m PEM -C "Jenkins agent key" -f "jenkinsAgent_rsa"
+        $ mkdir ~/.ssh; cd ~/.ssh/ && ssh-keygen -t rsa -m PEM -C "Jenkins agent key" -f "jenkinsAgent_rsa"
 
       9.  Add the public SSH key to the list of authorized keys on the agent machine
         
-        cat jenkinsAgent_rsa.pub >> ~/.ssh/authorized_keys
+        $ cat jenkinsAgent_rsa.pub >> ~/.ssh/authorized_keys
 
       10. Ensure that the permissions of the ~/.ssh directory is secure, as most ssh daemons will refuse to use keys that have file permissions that are considered insecure:
         
-        chmod 700 ~/.ssh
-        chmod 600 ~/.ssh/authorized_keys ~/.ssh/jenkinsAgent_rsa
+        $ chmod 700 ~/.ssh
+        $ chmod 600 ~/.ssh/authorized_keys ~/.ssh/jenkinsAgent_rsa
 
       11. Copy the private SSH key (~/.ssh/jenkinsAgent_rsa) from the agent machine to your OS clipboard (eg: xclip, pbcopy, or ctrl-c).
         cat ~/.ssh/jenkinsAgent_rsa
@@ -1472,6 +1512,7 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
         -----END RSA PRIVATE KEY-----
 
 3. In Jenkins go to Dashboard > Manage Jenkins > Nodes > New node
+   
    - Name: "silver-node"
    - Type: Permanent Agent
    - Hit Create
@@ -1504,6 +1545,7 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
 1. Go to Jenkins > Dashboard > New item > name-of-your-job, "test-build-on-slave" 
    - Freestyle
    - Hit OK
+
 2. Scroll down to Build Steps > Add build step
    - Execute shell > Command
      - Paste your commands in the box
@@ -1514,6 +1556,7 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
             ls -ltr
             echo "This is so cool!"
      - Hit the Save button
+
 3. Hit Build Now
    chances are it will build from the node because we selected the option of using node as much as possible
 
@@ -1538,14 +1581,19 @@ Up until now, all the jobs ran on the Master node. Normally in production you wi
 
 4. Go to the node and verify that the build files are there
    
-        ls /opt/jenkins-builds/workspace/
+        $ ls /opt/jenkins-builds/workspace/
+
 5. To always build using a node, not letting it to chance
+   
+   
    - Go to Dashboard > your-build-name, "test-build-on-slave" > Configure > General > Restrict where this project can be run
      - Label Expression: SILVER
      - Hit Save
   
     Note: On a side note, you may choose a job and change the build label for example SILVER, and you need to make sure it has Git, it should have MAVEN, since MAVEN was installed globally in Jenkins server, it will be installed before running the build on Silver node.
+
 ## Securing Jenkins 
+
 This section will tackle Authentication and Authorization, i.e. user, permissions, roles, job permissions, etc. As a devops you build a pipeline and then hand it over to developers, testers, Ops or non-Ops teams. This require segregation of duties and least privilege practice in place. Authentication is login, Authorization is the privilege.
 
 ### 1. Methods of Authentication
@@ -1595,6 +1643,7 @@ You can create different roles and add users to it or group, to facilitate acces
    - Project-based Matrix Authorization Strategy
   
   Note: Recommended options are Matrix-based security and Project-based Matrix Authorization Strategy
+
 ### 5. Different Authorization Types Setup
 
 **Steps**
@@ -1646,6 +1695,7 @@ You can create different roles and add users to it or group, to facilitate acces
     Note that John has only access to this job/project and effectively can't delete nor configure it as well. This is following security best practices of least privilege permissions.
 
  ### 6. Creating a role
+ 
  For easy management of users, you can create roles and assign them to users to streamline user permissions.
 
  **Steps**
