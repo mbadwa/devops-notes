@@ -519,15 +519,16 @@ Workflow Diagram of the CI
   
        $ ssh -i "SonarKey" ubuntu@instance-public-IP
 
-3. Create a script as a root user
+3. Create a script with `sudo` privileges
   
-       $ vi sonar-setup.sh
+       $ sudo vi sonar-setup.sh
    
    Copy, paste and save the [sonar-setup.sh](/Jenkins-notes/Sonarqube-setup/sonar-setup.sh) content. 
    
 4. Change script permissions and run the script
    
-       $ chmod +x sonar-setup.sh
+       $ sudo chmod +x sonar-setup.sh
+       $ sudo ./sonar-setup.sh
 
 5. To check the browser
 

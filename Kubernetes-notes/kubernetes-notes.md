@@ -365,57 +365,57 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
           - Public hosted zone
         - Hit Create hosted zone
   
-  5. Copy NS Servers URLs in GoDaddy
-       - Go to [GoDaddy](https://dcc.godaddy.com/) or your DNS registrar > Domains > DNS Name Servers 
-       - Hit Change name servers > Add (Similar to those)
+  5. Copy NS Servers and paste in GoDaddy
+       - Go to [GoDaddy](https://dcc.godaddy.com/) or your DNS registrar > Domains > DNS > Name Servers 
+       - Hit Change name servers > Add (Similar to those). Make sure you add without a `dot` at the end of each
 
-                ns-826.awsdns-39.net.
-                ns-1456.awsdns-54.org.
-                ns-1629.awsdns-11.co.uk.
-                ns-410.awsdns-51.com.
+                ns-826.awsdns-39.net
+                ns-1456.awsdns-54.org
+                ns-1629.awsdns-11.co.uk
+                ns-410.awsdns-51.com
         
   6. SSH into the VM instance
     
-         chmod "400" kops-key.pem
-         ssh -i "kops-key.pem" ubuntu@your-vm-public-key
+         $ chmod "400" kops-key.pem
+         $ ssh -i "kops-key.pem" ubuntu@your-vm-public-key
   
   
   7. Generate SSH key for kops
   
-         ssh-keygen
+         $ ssh-keygen
   
   8. Install AWSCLI enter the credentials downloaded earlier, format put json
   
-         sudo apt update && sudo apt install awscli -y
-         aws configure
+         $ sudo apt update && sudo apt install awscli -y
+         $ aws configure
   
   9. Install [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/). Follow the given instructions
   10. Install [kOps](https://github.com/kubernetes/kops/releases) >  [v1.26.4](https://github.com/kubernetes/kops/releases/tag/v1.26.4) > Scroll to Assets > kops-linux-amd64
 
       - Copy the link 
   
-            wget https://github.com/kubernetes/kops/releases/download/v1.26.4/kops-linux-amd64
-            ls
-            chmod +x kops-linux-amd64
-            sudo mv kops-linux-amd64 /usr/local/bin/kops
-            kops version
+            $ wget https://github.com/kubernetes/kops/releases/download/v1.26.4/kops-linux-amd64
+            $ ls
+            $ chmod +x kops-linux-amd64
+            $ sudo mv kops-linux-amd64 /usr/local/bin/kops
+            $ kops version
   11. Verify your domain
   
-            nslookup -type=ns kubevpro.mbadwa.com
+            $ nslookup -type=ns kubevpro.mbadwa.com
 
   12. Create a k8s configuration file and store it in S3 bucket using kops
   
-            kops create cluster --name=kubevpro.mbadwa.com \
+            $ kops create cluster --name=kubevpro.mbadwa.com \
             --state=s3://your-bucket-name --zones=us-east-1a,us-east-1b \
             --node-count=2 --node-size=t3.small --master-size=t3.medium --dns-zone=kubevpro.mbadwa.com \
             --node-volume-size=8 --master-volume-size=8
 
             # Finally, configure your cluster with: 
-            kops update cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin
+            $ kops update cluster --name kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes --admin
   
   13. Wait 25-30 min then validate the cluster
 
-            kops validate cluster --state=s3://kops-mbadwa-bucket
+            $ kops validate cluster --state=s3://kops-mbadwa-bucket
   
   14. Go to EC2 > instances > nodes-us-east-1a.kubevpro.mbadwa.com > Security > Security Groups > Edit
       - Add rule
@@ -423,13 +423,13 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
   
   15. When kops creates a cluster it also creates a kube config file for kubectl that used to connect to the cluster
   
-            cat ~/.kub/config
+            $ cat ~/.kub/config
 
       Kops creates autoscaling groups, VPC, adds new records in Route 53. You can verify by checking them out
   16. Clean once done
 
-            kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
-            sudo poweroff
+            $ kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
+            $ sudo poweroff
 
 #### How to pause your kOps-managed Kubernetes cluster on AWS
 
@@ -441,20 +441,20 @@ These steps assumes that you have a kOps managed Kubernetes cluster running on A
 
 **Steps**
 
-1. Run ```kops get ig``` to list the instance groups. You will see two instance groups — one for the control plane and one for your worker nodes.Eg: If you’ve been using kOps in the us-east-1a and us-east-1b availability zones, you will see ```control-plane-us-east-1a``` & ```nodes-us-east-1a```.
+1. Run `kops get ig` to list the instance groups. You will see two instance groups — one for the control plane and one for your worker nodes.Eg: If you’ve been using kOps in the us-east-1a and us-east-1b availability zones, you will see ```control-plane-us-east-1a``` & ```nodes-us-east-1a```.
    
         $ kops get ig
 
-2. Run ```kops edit ig nodes-us-east-1a``` and change the ```minSize``` and ```maxSize``` values to 0.
+2. Run `kops edit ig nodes-us-east-1a` and change the `minSize` and `maxSize` values to 0.
    
         $ kops edit ig nodes-us-east-1a --state=s3://kops-mbadwa-bucket
         $ kops edit ig nodes-us-east-1b --state=s3://kops-mbadwa-bucket
 
-3. Do the same for the control page group by running ```kops edit ig control-plane-us-east-1a```.
+3. Do the same for the control page group by running `kops edit ig control-plane-us-east-1a`.
 
         $ kops edit ig control-plane-us-east-1a --state=s3://kops-mbadwa-bucket
 
-4. To apply these changes to your cluster, run ```kops update cluster --name=${NAME} --yes```. Here NAME is a global variable referring to the name of your cluster.
+4. To apply these changes to your cluster, run `kops update cluster --name=${NAME} --yes`. Here NAME is a global variable referring to the name of your cluster.
 
         $ kops update cluster --name=${NAME} --state=s3://kops-mbadwa-bucket --yes
 
@@ -503,9 +503,9 @@ Use kubeconfig files to organize information about;
    
 The Kube config file location
 
-    ls -a
-    ls .kube/
-    less .kube/config
+    $ ls -a
+    $ ls .kube/
+    $ less .kube/config
 
 Information 
 
@@ -590,7 +590,7 @@ The pod we created ourselves but the service was created automatically
 
 Running this command will get all namespaces
 
-    $kubectl get all --all-namespaces
+    $ kubectl get all --all-namespaces
 
 Output:
 
@@ -598,7 +598,7 @@ Output:
 
 To get from specific namespace
 
-    $kubectl get svc -n kube-system
+    $ kubectl get svc -n kube-system
 
 Output:
 
@@ -607,7 +607,7 @@ Output:
 
 Creating a custom name space
 
-    $kubectl create ns kubekart
+    $ kubectl create ns kubekart
 
 Output:
 
@@ -615,7 +615,7 @@ Output:
 
 Create a pod in kubekart namespace
 
-    kubectl run nginx1 --image=nginx -n kubekart
+    $ kubectl run nginx1 --image=nginx -n kubekart
 
 Output
 
@@ -623,7 +623,7 @@ Output
 
 Creating a pod from a yaml [file](pod1.yaml)
 
-    kubectl apply -f pod1.yaml
+    $ kubectl apply -f pod1.yaml
 
 Output
 
@@ -637,7 +637,7 @@ Check if the new pod was created
 
 Delete the test name space kubekart, note be careful in prod environment, the command is disastrous, this deletes everything inside the namespace and the namespace itself
 
-    kubectl delete ns kubekart
+    $ kubectl delete ns kubekart
 
 Output:
 
@@ -771,7 +771,7 @@ Mistakes do happen, to minimize mistakes in any project, it's best to replicate 
 
 Create a pod
 
-    kubectl apply -f pod2.yaml
+    $ kubectl apply -f pod2.yaml
 
 Check status of pods
 
@@ -786,7 +786,7 @@ Output
 
 Run the command below
 
-    kubectl get pod nginx-02 -o yaml
+    $ kubectl get pod nginx-02 -o yaml
 
 Output extract
 
@@ -833,7 +833,7 @@ Output
 
 Fix the typo in the [yaml file](pod2.yaml) from nginix to nginx
 
-    kubectl apply -f pod2.yaml
+    $ kubectl apply -f pod2.yaml
 
 Output
 
@@ -866,7 +866,7 @@ Output
 
 Run the yaml command output
     
-    kubectl get pod web-02 -o yaml
+    $ kubectl get pod web-02 -o yaml
 
 Output
 
@@ -1240,6 +1240,7 @@ ClusterIP Service yaml [file](tom-svc-clusterip.yml)
  2. Delete pod
         
         $ kubectl delete pod pod/vproapp
+ 
  3. Delete Service
 
         $ kubectl delete svc service/webapp-service
@@ -1441,7 +1442,7 @@ You describe a *desired state* in a Deployment, and the Deployment Controller ch
 
 3. ReplicaSet in turn creates pods
 
-       kubectl get pod
+       $ kubectl get pod
 
    Output
 
@@ -1535,7 +1536,7 @@ A Deployment's rollout is triggered if and only if the Deployment's Pod template
 
    To roll back to the previous version
 
-       kubectl rollout undo deployment/nginx-deployment
+       $ kubectl rollout undo deployment/nginx-deployment
 
    Output
 
@@ -1616,7 +1617,7 @@ How can you pass commands and arguments to a container in your Pod? Remember tha
 
   To run it
 
-      docker run printer hi
+      $ docker run printer hi
 
 - When you build an image with ENTRYPOINT and CMD together, when you run *docker run printer* it will say; "echo hi", and when you run *docker run printer hello* it'll override the argument "hi" command in the CMD and replace it with *hello*.
 
@@ -2084,7 +2085,7 @@ The above section of the code is the usual, let's break down the env section and
   
   1. Create a [config map](samplecm.yaml)
    
-         kubectl  apply -f samplecm.yaml
+         $ kubectl  apply -f samplecm.yaml
 
   2. Create a vim [readcm.yaml](readcmpod.yaml) file
   
@@ -2097,6 +2098,7 @@ The above section of the code is the usual, let's break down the env section and
      Output
 
           pod/configmap-demo-pod created
+  
   4. List pods
   
           $ kubectl get pod
@@ -2298,13 +2300,15 @@ Output
 
     root@secret-env-pod:/data# 
 
-Lets get the variables
+Let's get the username variable
 
-    echo $SECRET_USERNAME
+    $ echo $SECRET_USERNAME
 
 Output
 
     admin
+
+Let's get the password variable
 
     echo $SECRET_PASSWORD
 
