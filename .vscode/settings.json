@@ -41,6 +41,7 @@
         "awslogs",
         "awslogsd",
         "boto",
+        "bpmpb",
         "buildx",
         "chrony",
         "chronyd",

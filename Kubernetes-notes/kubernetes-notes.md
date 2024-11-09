@@ -426,7 +426,7 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
             $ cat ~/.kub/config
 
       Kops creates autoscaling groups, VPC, adds new records in Route 53. You can verify by checking them out
-  16. Clean once done
+  16. Clean up
 
             $ kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
             $ sudo poweroff
