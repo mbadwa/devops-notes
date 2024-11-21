@@ -426,6 +426,7 @@ Minikube runs on [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads) o
             $ cat ~/.kub/config
 
       Kops creates autoscaling groups, VPC, adds new records in Route 53. You can verify by checking them out
+  
   16. Clean up
 
             $ kops delete cluster --name=kubevpro.mbadwa.com --state=s3://kops-mbadwa-bucket --yes
@@ -443,7 +444,7 @@ These steps assumes that you have a kOps managed Kubernetes cluster running on A
 
 1. Run `kops get ig` to list the instance groups. You will see two instance groups — one for the control plane and one for your worker nodes.Eg: If you’ve been using kOps in the us-east-1a and us-east-1b availability zones, you will see ```control-plane-us-east-1a``` & ```nodes-us-east-1a```.
    
-        $ kops get ig
+        $ kops get ig --state=s3://kops-mbadwa-bucket
 
 2. Run `kops edit ig nodes-us-east-1a` and change the `minSize` and `maxSize` values to 0.
    
