@@ -61,7 +61,7 @@ This section will cover how to install Jenkins server in AWS, configure it and r
           - Type: "Custom TCP", Protocol: "TCP", Port range: 8080 
           - Source type: "Anywhere", Source: "0.0.0.0/0", Description: "Jenkins Web Access"
 
-   - Expand the **Advanced details** section, paste the script under the **User data** section or run the commands from the [script](jenkins-setup.sh) after installation.
+   - Expand the **Advanced details** section, paste the script under the **User data** section or run the commands from the [script](jenkins-setup.sh) after installation, for detailed info, here's the [jenkins documentation](https://www.jenkins.io/doc/book/installing/linux/).
 
    - Hit the Launch instance button
 

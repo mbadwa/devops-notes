@@ -1,28 +1,24 @@
 #!/bin/bash
 
-# Jenkins Server install with two JDK versions as dependencies
+# Install latest Java JDK
+sudo apt-get update
 
-sudo apt update
+sudo apt-get install openjdk-21-jdk -y
 
-sudo apt install openjdk-11-jdk  -y
-
+# Download repo key
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-	https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
 
+# Create repo file
 echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
-	https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-	/etc/apt/sources.list.d/jenkins.list > /dev/null
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
 
-sudo apt update
+# Install Jenkins
+sudo apt-get update
 
-sudo apt install jenkins -y
+sudo apt-get install jenkins -y
 
 sudo systemctl start jenkins
 
 sudo systemctl enable jenkins
-
-sleep 5
-
-sudo apt install openjdk-8-jdk  -y
-sudo apt install maven -y
-
