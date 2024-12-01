@@ -60,15 +60,10 @@ This section will cover how to install Jenkins server in AWS, configure it and r
 
           - Type: "Custom TCP", Protocol: "TCP", Port range: 8080 
           - Source type: "Anywhere", Source: "0.0.0.0/0", Description: "Jenkins Web Access"
+       - Configure storage
+         - 20 GiB : gp3
 
    - Expand the **Advanced details** section, paste the script under the **User data** section or run the commands from the [script](jenkins-setup.sh) after installation, for detailed info, here's the [jenkins documentation](https://www.jenkins.io/doc/book/installing/linux/).
-
-   - Hit the Launch instance button
-   - Increase volume size to 20 GB
-     - Go to EC2 > JenkinsServer > Storage > click on the volume link
-       - Name: `Jenkins Root Volume`
-       - Actions > Modify volume > bump the size to 20GB
-       - Modify
 
 ### 2. Log into Jenkins server & Perform Initial Setup
 
