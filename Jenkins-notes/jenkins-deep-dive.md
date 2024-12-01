@@ -87,12 +87,21 @@ This section will cover how to install Jenkins server in AWS, configure it and r
            $ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
     NOTE: Jenkins root folder is `/var/lib/jenkins/`, all files are found here except for the logs. If you want to move Jenkins to another server. You can easily archive this folder and extract it on the other server. However, Java has to be installed first.
+   
+   - First screen enter password and hit Next
+   - Getting Started
+     - Username: Admin
+     - Password: Your-Password
+     - Full name: Admin
+     - E-mail Address: fake@email.com or real-one@email.com (if on realtime project) 
+   - Hit Save and Continue
+   - Jenkins URL: http://fake.domain.com:8080/ or http://real.domain.com:8080/
 
 2. Tools & Plugins Setup
    
    **Steps**
 
-    1. To install a JDK version 17 on the backend, SSH into your server and locate the install folder & list all installed versions
+    1. To install a JDK version 11 on the backend, SSH into your server and locate the install folder & list all installed versions
 
             $ sudo apt install openjdk-11-jdk -y
             $ ls /usr/lib/jvm/
