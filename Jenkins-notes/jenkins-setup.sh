@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Install latest Java JDK
-sudo apt-get update
+sudo apt update
 
-sudo apt-get install openjdk-21-jdk -y
+sudo apt install openjdk-17-jdk -y
 
 # Download repo key
 sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
@@ -15,9 +15,9 @@ echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
   /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 # Install Jenkins
-sudo apt-get update
+sudo apt update
 
-sudo apt-get install jenkins -y
+sudo apt install jenkins -y
 
 sudo systemctl start jenkins
 

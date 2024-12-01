@@ -38,9 +38,9 @@ This section will cover how to install Jenkins server in AWS, configure it and r
        - Name and tags
          - Name: "JenkinsServer"
        - Application and OS Images (Amazon Machine Image)
-         - Search for ubuntu 20.0.4 LTS/ 22.0.4 LTS
+         - Search for ubuntu 20.0.4 LTS/ 22.0.4 LTS /24.0.4 LTS
        - Instance type
-         - t2.medium
+         - t2.medium 
        - Key pair(login)
          - Select "JenkinsKey"
        - Network Settings > Edit
@@ -64,6 +64,11 @@ This section will cover how to install Jenkins server in AWS, configure it and r
    - Expand the **Advanced details** section, paste the script under the **User data** section or run the commands from the [script](jenkins-setup.sh) after installation, for detailed info, here's the [jenkins documentation](https://www.jenkins.io/doc/book/installing/linux/).
 
    - Hit the Launch instance button
+   - Increase volume size to 20 GB
+     - Go to EC2 > JenkinsServer > Storage > click on the volume link
+       - Name: `Jenkins Root Volume`
+       - Actions > Modify volume > bump the size to 20GB
+       - Modify
 
 ### 2. Log into Jenkins server & Perform Initial Setup
 
@@ -73,60 +78,64 @@ This section will cover how to install Jenkins server in AWS, configure it and r
    
    - ssh into the EC2 Instance by running
 
-           ssh -i /location/of/your/jenkins/key ubuntu@public-ip
+           $ ssh -i /location/of/your/jenkins/key ubuntu@public-ip
 
    - Check services and user jenkins by running
     
-           systemctl status jenkins
-           id jenkins
+           $ systemctl status jenkins
+           $ id jenkins
 
    - Log into the server by pasting the public IP into the browser appending port 8080; http://your-public-IP:8080
    - Follow the initial set up prompts and hit the **Save** and finish
    - To view the initial password run;
 
-           cat /var/lib/jenkins/secrets/initialAdminPassword
+           $ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+    NOTE: Jenkins root folder is `/var/lib/jenkins/`, all files are found here except for the logs. If you want to move Jenkins to another server. You can easily archive this folder and extract it on the other server. However, Java has to be installed first.
 
 2. Tools & Plugins Setup
    
    **Steps**
 
-    1. To install a JDK version 11 on the frontend, SSH into your server and locate the install folder
+    1. To install a JDK version 17 on the backend, SSH into your server and locate the install folder & list all installed versions
 
-            ls /usr/lib/jvm/installed-version-here
-
-    2. Go to Dashboard > Manage Jenkins >  Tools 
-    3. Install JDK version 11 tool
+            $ sudo apt install openjdk-11-jdk -y
+            $ ls /usr/lib/jvm/
     
-          - Go to JDK installations > Add JDK > JDK
-           
-            Name
-              - OracleJDK11
-              
-            JAVA_HOME
-              - /usr/lib/jvm/java-1.11.0-openjdk-amd64
-    	
-              - Hit the Add JDK button
-        
-    4. Install JDK version 8 tool
+    2. Install JDK version 17 tool
+ 
+         - Go to Dashboard > Manage Jenkins > Tools 
+    
+            - JDK installations > Add JDK > JDK
+             
+              Name
+                - JDK17
+                
+              JAVA_HOME
+                - /usr/lib/jvm/java-1.17.0-openjdk-amd64
+          
+    3. Install JDK version 11 tool
        
           - Go to JDK installations > Add JDK > JDK
 
             Name
-              - OracleJDK8
+              - JDK11
         
 	          JAVA_Home
-              - /usr/lib/jvm/java-1.8.0-openjdk-amd64
+              - /usr/lib/jvm/java-1.11.0-openjdk-amd64
   
-    5. Install a Maven tool
+    4. Install a Maven tool
 
           - Go to Maven installations > Add Maven > Maven > 
 	        
             Name
               - MAVEN3
-        	- Check the Install automatically box > Add Maven
+        	- Check the Install automatically box 
+	         
+              - Install from Apache
+              - Version: 3.9.9
   
             **Save** to finish
-
 
 ### 3. Creating jobs using Freestyle option
 
