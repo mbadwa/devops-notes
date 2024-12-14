@@ -711,7 +711,7 @@ In this project we will use SonarQube Scanner and Checkstyle. Before we start an
     - URL: http://jenkins-server-private-IP:8080/sonarqube-webhook
     - Hit on Create
   
-      Note: The URL should be similar to above, of course replacing with your instances private IP, otherwise it will be in pending state and the job will end up failing. Also, the security group should allow SonarQube traffic in Jenkins.
+      **Note:** The URL should be similar to above, of course replacing with your instances private IP, otherwise it will be in **pending state** and the job will end up failing. Also, the security group should allow SonarQube traffic in Jenkins.
 
 ### 6. Nexus Code Artifact Upload
 
@@ -1753,3 +1753,4 @@ You can create different roles and add users to it or group, to facilitate acces
 3. [Install Docker Engine](https://docs.docker.com/engine/install/)
 4. [Add an SSH-Enabled User](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/add-ssh-enabled-user.html)
 5. [How to Connect to Remote SSH Agents?](https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/client-and-managed-controllers/how-to-connect-to-remote-ssh-agents)
+6. [SonarQube Installation Binaries](https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/)
