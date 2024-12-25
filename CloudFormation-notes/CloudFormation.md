@@ -351,8 +351,6 @@ Section Breakdown
         - Go to CloudFormation > Stack > `InitMetadata`
         - Hit Delete 
 
-
-
 # References
 
 1. [AWS CloudFormation EC2 Documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-eip.html)
