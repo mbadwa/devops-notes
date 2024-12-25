@@ -1,5 +1,6 @@
 {
     "cSpell.ignoreWords": [
+        "AMIID",
         "Burstable",
         "CICD",
         "Checkstyle",
@@ -148,6 +149,7 @@
         "sqluser",
         "storageclass",
         "swpc",
+        "sysvinit",
         "terradmin",
         "terrakey",
         "textmode",
